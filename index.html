@@ -9,452 +9,282 @@
   <script src="https://cdn.jsdelivr.net/npm/upng-js@2.1.0/UPNG.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
   <style>
-    /* 基础重置 & 变量 – 夜间模式自动反色通过 prefers-color-scheme 实现 */
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --bg-body: #f5f7fc;
-      --bg-card: #ffffff;
-      --bg-subtle: #f0f4fe;
-      --bg-tabs: #f0f4fa;
-      --bg-tab-active: #ffffff;
-      --bg-upload: #f8faff;
-      --bg-upload-hover: #f2f7ff;
-      --bg-trace: #f8faff;
-      --bg-file-status: #f0f5ff;
-      --bg-log: #f0f4fa;
-      --bg-extract: #f0f7f0;
-      --bg-compress-options: #f0f4fe;
-      --bg-font-section: #faf8ff;
-      --bg-font-status: #f5f0ff;
-      --bg-audio-replace: #fafff8;
-      --bg-encrypt-drop: #fafcff;
-      --bg-encrypt-log: #f0f4fa;
-      --border-subtle: #e9eef4;
-      --border-dash: #cbd5e1;
-      --border-dash-hover: #3b7cff;
-      --text-primary: #0b1b33;
-      --text-secondary: #1f2a44;
-      --text-muted: #4a5a72;
-      --text-light: #6a7b94;
-      --text-white: #ffffff;
-      --shadow-card: 0 20px 60px rgba(0, 10, 30, 0.12);
-      --shadow-tab: 0 2px 8px rgba(0, 0, 0, 0.06);
-      --color-accent: #3b7cff;
-      --color-accent-dark: #2a5a8e;
-      --color-success: #4CAF50;
-      --color-success-bg: #dff0e8;
-      --color-error-bg: #fde9ed;
+      --bg-body: #f5f7fc; --bg-card: #ffffff; --bg-subtle: #f0f4fe;
+      --bg-tabs: #f0f4fa; --bg-tab-active: #ffffff; --bg-upload: #f8faff;
+      --bg-upload-hover: #f2f7ff; --bg-trace: #f8faff; --bg-file-status: #f0f5ff;
+      --bg-log: #f0f4fa; --bg-extract: #f0f7f0; --bg-compress-options: #f0f4fe;
+      --bg-font-section: #faf8ff; --bg-font-status: #f5f0ff;
+      --bg-audio-replace: #fafff8; --bg-encrypt-drop: #fafcff; --bg-encrypt-log: #f0f4fa;
+      --border-subtle: #e9eef4; --border-dash: #cbd5e1; --border-dash-hover: #3b7cff;
+      --text-primary: #0b1b33; --text-secondary: #1f2a44; --text-muted: #4a5a72;
+      --text-light: #6a7b94; --text-white: #ffffff;
+      --shadow-card: 0 20px 60px rgba(0, 10, 30, 0.12); --shadow-tab: 0 2px 8px rgba(0, 0, 0, 0.06);
+      --color-accent: #3b7cff; --color-accent-dark: #2a5a8e;
+      --color-success: #4CAF50; --color-success-bg: #dff0e8; --color-error-bg: #fde9ed;
       --color-font-badge: #6b4a8e;
     }
-
     @media (prefers-color-scheme: dark) {
       :root {
-        --bg-body: #121826;
-        --bg-card: #1e2638;
-        --bg-subtle: #2a3348;
-        --bg-tabs: #2a3348;
-        --bg-tab-active: #1e2638;
-        --bg-upload: #1a2236;
-        --bg-upload-hover: #252f46;
-        --bg-trace: #1a2236;
-        --bg-file-status: #1f2a44;
-        --bg-log: #1a2236;
-        --bg-extract: #1a2e2a;
-        --bg-compress-options: #1f2a44;
-        --bg-font-section: #221f2e;
-        --bg-font-status: #2a223e;
-        --bg-audio-replace: #1a2a22;
-        --bg-encrypt-drop: #1a2236;
-        --bg-encrypt-log: #1a2236;
-        --border-subtle: #2e3a4e;
-        --border-dash: #3a4a5e;
-        --border-dash-hover: #5a8aff;
-        --text-primary: #e8edf5;
-        --text-secondary: #cfd8e6;
-        --text-muted: #9aabbe;
-        --text-light: #8a9bb0;
-        --text-white: #eef2f8;
-        --shadow-card: 0 20px 60px rgba(0, 0, 0, 0.5);
-        --shadow-tab: 0 2px 8px rgba(0, 0, 0, 0.3);
-        --color-accent: #5a8aff;
-        --color-accent-dark: #3a6ace;
-        --color-success: #66bb6a;
-        --color-success-bg: #1a3a2a;
-        --color-error-bg: #3a1a1e;
+        --bg-body: #121826; --bg-card: #1e2638; --bg-subtle: #2a3348;
+        --bg-tabs: #2a3348; --bg-tab-active: #1e2638; --bg-upload: #1a2236;
+        --bg-upload-hover: #252f46; --bg-trace: #1a2236; --bg-file-status: #1f2a44;
+        --bg-log: #1a2236; --bg-extract: #1a2e2a; --bg-compress-options: #1f2a44;
+        --bg-font-section: #221f2e; --bg-font-status: #2a223e;
+        --bg-audio-replace: #1a2a22; --bg-encrypt-drop: #1a2236; --bg-encrypt-log: #1a2236;
+        --border-subtle: #2e3a4e; --border-dash: #3a4a5e; --border-dash-hover: #5a8aff;
+        --text-primary: #e8edf5; --text-secondary: #cfd8e6; --text-muted: #9aabbe;
+        --text-light: #8a9bb0; --text-white: #eef2f8;
+        --shadow-card: 0 20px 60px rgba(0, 0, 0, 0.5); --shadow-tab: 0 2px 8px rgba(0, 0, 0, 0.3);
+        --color-accent: #5a8aff; --color-accent-dark: #3a6ace;
+        --color-success: #66bb6a; --color-success-bg: #1a3a2a; --color-error-bg: #3a1a1e;
         --color-font-badge: #8a6aae;
       }
     }
-
-    body {
-      background: var(--bg-body);
-      display: flex; justify-content: center; align-items: flex-start;
-      min-height: 100vh;
-      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-      padding: 20px;
-      transition: background 0.3s, color 0.3s;
-    }
-
-    .card {
-      max-width: 1100px; width: 100%;
-      background: var(--bg-card);
-      border-radius: 32px;
-      box-shadow: var(--shadow-card);
-      padding: 32px 28px;
-      transition: background 0.3s, box-shadow 0.3s, color 0.3s;
-      color: var(--text-primary);
-    }
-
+    body { background: var(--bg-body); display: flex; justify-content: center; align-items: flex-start;
+      min-height: 100vh; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      padding: 20px; transition: background 0.3s, color 0.3s; }
+    .card { max-width: 1100px; width: 100%; background: var(--bg-card);
+      border-radius: 32px; box-shadow: var(--shadow-card); padding: 32px 28px;
+      transition: background 0.3s, box-shadow 0.3s, color 0.3s; color: var(--text-primary); }
     h1 { font-size: 26px; font-weight: 600; color: var(--text-primary);
       display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap: wrap; }
-
-    .sub { color: var(--text-muted); font-size: 15px;
-      border-left: 3px solid var(--color-accent); padding-left: 14px;
-      margin-bottom: 18px; background: var(--bg-subtle);
-      border-radius: 0 12px 12px 0; line-height: 1.6;
-      transition: background 0.3s, color 0.3s; }
-
-    .main-tabs { display: flex; gap: 6px; margin-bottom: 18px;
-      background: var(--bg-tabs); border-radius: 60px; padding: 4px;
-      flex-wrap: wrap; transition: background 0.3s; }
-
-    .main-tab { flex: 1; text-align: center; padding: 10px 0;
-      border-radius: 40px; font-weight: 600; font-size: 14px;
-      color: var(--text-muted); cursor: pointer; transition: 0.2s;
-      border: none; background: transparent; min-width: 100px; }
-
-    .main-tab.active { background: var(--bg-tab-active);
-      color: var(--text-primary); box-shadow: var(--shadow-tab); }
-
+    .sub { color: var(--text-muted); font-size: 15px; border-left: 3px solid var(--color-accent);
+      padding-left: 14px; margin-bottom: 18px; background: var(--bg-subtle);
+      border-radius: 0 12px 12px 0; line-height: 1.6; transition: background 0.3s, color 0.3s; }
+    .main-tabs { display: flex; gap: 6px; margin-bottom: 18px; background: var(--bg-tabs);
+      border-radius: 60px; padding: 4px; flex-wrap: wrap; transition: background 0.3s; }
+    .main-tab { flex: 1; text-align: center; padding: 10px 0; border-radius: 40px;
+      font-weight: 600; font-size: 14px; color: var(--text-muted); cursor: pointer;
+      transition: 0.2s; border: none; background: transparent; min-width: 100px; }
+    .main-tab.active { background: var(--bg-tab-active); color: var(--text-primary); box-shadow: var(--shadow-tab); }
     .main-tab:hover:not(.active) { background: rgba(255, 255, 255, 0.1); }
-
     .section { display: none; animation: fadeIn 0.25s ease; }
     .section.active { display: block; }
-
-    @keyframes fadeIn {
-      from { opacity: 0.6; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .mode-tabs { display: flex; gap: 8px; margin-bottom: 16px;
-      background: var(--bg-tabs); border-radius: 60px; padding: 4px;
-      flex-wrap: wrap; transition: background 0.3s; }
-
-    .mode-tab { flex: 1; text-align: center; padding: 10px 0;
-      border-radius: 40px; font-weight: 600; font-size: 14px;
-      color: var(--text-muted); cursor: pointer; transition: 0.2s;
-      border: none; background: transparent; min-width: 90px; }
-
-    .mode-tab.active { background: var(--bg-tab-active);
-      color: var(--text-primary); box-shadow: var(--shadow-tab); }
-
+    @keyframes fadeIn { from { opacity: 0.6; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .mode-tabs { display: flex; gap: 8px; margin-bottom: 16px; background: var(--bg-tabs);
+      border-radius: 60px; padding: 4px; flex-wrap: wrap; transition: background 0.3s; }
+    .mode-tab { flex: 1; text-align: center; padding: 10px 0; border-radius: 40px;
+      font-weight: 600; font-size: 14px; color: var(--text-muted); cursor: pointer;
+      transition: 0.2s; border: none; background: transparent; min-width: 90px; }
+    .mode-tab.active { background: var(--bg-tab-active); color: var(--text-primary); box-shadow: var(--shadow-tab); }
     .mode-tab:hover:not(.active) { background: rgba(255, 255, 255, 0.1); }
-
     .upload-area { background: var(--bg-upload); border: 2px dashed var(--border-dash);
-      border-radius: 24px; padding: 20px 16px; text-align: center;
-      cursor: pointer; transition: 0.2s; margin-bottom: 12px;
-      color: var(--text-secondary); }
-
+      border-radius: 24px; padding: 20px 16px; text-align: center; cursor: pointer;
+      transition: 0.2s; margin-bottom: 12px; color: var(--text-secondary); }
     .upload-area:hover { border-color: var(--border-dash-hover); background: var(--bg-upload-hover); }
-    .upload-area.dragover { border-color: var(--border-dash-hover);
-      background: var(--bg-upload-hover); box-shadow: 0 0 0 4px rgba(59, 124, 255, 0.15); }
-
+    .upload-area.dragover { border-color: var(--border-dash-hover); background: var(--bg-upload-hover);
+      box-shadow: 0 0 0 4px rgba(59, 124, 255, 0.15); }
     .upload-icon { font-size: 34px; margin-bottom: 2px; }
     .upload-text { font-weight: 500; color: var(--text-secondary); }
     .upload-hint { font-size: 14px; color: var(--text-light); margin-top: 2px; }
-
     #fileInput { display: none; }
-
     .file-status { display: flex; align-items: center; justify-content: space-between;
       background: var(--bg-file-status); padding: 6px 16px; border-radius: 60px;
       margin: 4px 0 12px; flex-wrap: wrap; color: var(--text-secondary); }
-
-    .file-name { font-weight: 500; color: var(--text-primary);
-      overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px; }
-
+    .file-name { font-weight: 500; color: var(--text-primary); overflow: hidden;
+      text-overflow: ellipsis; white-space: nowrap; max-width: 180px; }
     .badge { background: var(--color-accent); color: var(--text-white);
       border-radius: 40px; padding: 3px 12px; font-size: 13px; font-weight: 500; }
-
     .direction-badge { font-size: 12px; background: var(--bg-tabs);
       padding: 2px 12px; border-radius: 40px; color: var(--text-secondary); }
-
     .row { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin: 4px 0 8px; }
     .row-label { font-weight: 500; color: var(--text-secondary); min-width: 100px; }
-
     .custom-demo { flex: 1; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
     .custom-demo input[type="file"] { display: none; }
-
     .custom-demo .file-btn { background: var(--bg-tabs); border: 1px solid var(--border-subtle);
       padding: 5px 16px; border-radius: 40px; font-size: 14px; font-weight: 500;
       color: var(--text-secondary); cursor: pointer; transition: 0.15s; display: inline-block; }
-
     .custom-demo .file-btn:hover { background: var(--bg-upload-hover); border-color: var(--border-dash-hover); }
-
-    .demo-preview { display: flex; align-items: center; gap: 8px;
-      background: var(--bg-subtle); padding: 2px 12px 2px 6px; border-radius: 40px; }
-
+    .demo-preview { display: flex; align-items: center; gap: 8px; background: var(--bg-subtle);
+      padding: 2px 12px 2px 6px; border-radius: 40px; }
     .demo-preview img { width: 32px; height: 32px; border-radius: 6px;
       object-fit: cover; background: var(--bg-tabs); }
-
     .demo-preview span { font-size: 13px; color: var(--text-secondary); }
     .clear-demo { font-size: 14px; color: var(--text-light); cursor: pointer; padding: 0 4px; }
-
     .demo-compressed-badge { font-size: 11px; background: var(--color-success);
       color: var(--text-white); padding: 2px 8px; border-radius: 20px; margin-left: 4px; }
-
-    .trace-row { background: var(--bg-trace); border-radius: 16px;
-      padding: 10px 16px; margin: 6px 0 10px; border: 1px solid var(--border-subtle);
-      display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px;
-      transition: background 0.3s, border 0.3s; }
-
+    .trace-row { background: var(--bg-trace); border-radius: 16px; padding: 10px 16px;
+      margin: 6px 0 10px; border: 1px solid var(--border-subtle); display: flex;
+      flex-wrap: wrap; align-items: center; gap: 10px 16px; transition: background 0.3s, border 0.3s; }
     .trace-row label { font-weight: 500; color: var(--text-secondary); font-size: 14px; }
-
-    .trace-row input { flex: 1; min-width: 160px; padding: 8px 14px;
-      border-radius: 40px; border: 1px solid var(--border-subtle); font-size: 14px;
-      outline: none; background: var(--bg-card); color: var(--text-primary);
-      transition: border 0.2s, background 0.3s; }
-
+    .trace-row input { flex: 1; min-width: 160px; padding: 8px 14px; border-radius: 40px;
+      border: 1px solid var(--border-subtle); font-size: 14px; outline: none;
+      background: var(--bg-card); color: var(--text-primary); transition: border 0.2s, background 0.3s; }
     .trace-row input:focus { border-color: var(--color-accent); box-shadow: 0 0 0 3px rgba(59, 124, 255, 0.15); }
     .trace-hint { font-size: 12px; color: var(--text-light); }
-
     .action-row { display: flex; gap: 12px; margin-top: 12px; flex-wrap: wrap; }
-
     .action-btn { background: var(--text-secondary); border: none; color: var(--text-white);
       padding: 12px 24px; border-radius: 60px; font-weight: 600; font-size: 16px;
       flex: 1; min-width: 140px; cursor: pointer; transition: 0.15s;
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
-      display: flex; align-items: center; justify-content: center; gap: 8px; }
-
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15); display: flex; align-items: center;
+      justify-content: center; gap: 8px; }
     .action-btn:disabled { opacity: 0.5; pointer-events: none; filter: grayscale(0.3); }
     .action-btn:hover:not(:disabled) { filter: brightness(1.1); transform: scale(0.98); }
-
     .action-btn.secondary { background: var(--bg-tabs); color: var(--text-secondary);
       box-shadow: none; border: 1px solid var(--border-subtle); }
     .action-btn.secondary:hover:not(:disabled) { background: var(--bg-upload-hover); }
-
     .action-btn.extract { background: #2a5a3e; color: white; }
     .action-btn.extract:hover:not(:disabled) { background: #1f4a2e; }
-
     .action-btn.audio { background: #7a4a3a; color: white; }
     .action-btn.audio:hover:not(:disabled) { background: #5f3a2e; }
-
     .action-btn.compress { background: var(--color-accent); color: white; }
     .action-btn.compress:hover:not(:disabled) { background: var(--color-accent-dark); }
-
     .action-btn.font { background: #6b4a8e; color: white; }
     .action-btn.font:hover:not(:disabled) { background: #5a3a7e; }
-
     .action-btn.encrypt-btn { background: #1a4c8c; color: white; }
     .action-btn.encrypt-btn:hover:not(:disabled) { background: #0f3a6e; }
-
     .action-btn.decrypt-btn { background: #b8942a; color: white; }
     .action-btn.decrypt-btn:hover:not(:disabled) { background: #9a7a1e; }
-
     .action-btn.replace-audio { background: #8e6b4a; color: white; }
     .action-btn.replace-audio:hover:not(:disabled) { background: #7a5a3a; }
-
     .log-box { margin-top: 12px; background: var(--bg-log); border-radius: 16px;
-      padding: 10px 16px; font-size: 13px; color: var(--text-primary);
-      max-height: 200px; overflow-y: auto; border: 1px solid var(--border-subtle);
+      padding: 10px 16px; font-size: 13px; color: var(--text-primary); max-height: 200px;
+      overflow-y: auto; border: 1px solid var(--border-subtle);
       font-family: 'SF Mono', 'Menlo', monospace; white-space: pre-wrap;
       word-break: break-word; transition: background 0.3s, color 0.3s, border 0.3s; }
-
     .log-box:empty { display: none; }
-
     .footnote { font-size: 13px; color: var(--text-light); text-align: center;
       margin-top: 12px; border-top: 1px solid var(--border-subtle);
       padding-top: 10px; transition: color 0.3s, border 0.3s; }
-
-    .extract-result { background: var(--bg-extract); border-radius: 12px;
-      padding: 10px 16px; margin-top: 8px; border: 1px solid var(--border-subtle);
-      display: none; color: var(--text-primary); transition: background 0.3s, border 0.3s; }
-
+    .extract-result { background: var(--bg-extract); border-radius: 12px; padding: 10px 16px;
+      margin-top: 8px; border: 1px solid var(--border-subtle); display: none;
+      color: var(--text-primary); transition: background 0.3s, border 0.3s; }
     .extract-result.show { display: block; }
     .extract-result strong { color: var(--text-secondary); }
-
     .mini-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
     .mini-row .action-btn { flex: 0 1 auto; min-width: 120px; padding: 8px 16px; font-size: 14px; }
-
     .audio-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px;
       padding: 8px 4px; border-top: 1px solid var(--border-subtle); }
-
     .audio-row .action-btn { flex: 0 1 auto; min-width: 140px; padding: 10px 18px; font-size: 14px; }
-
     .audio-direction { display: flex; gap: 8px; align-items: center; margin-left: 4px; }
-
     .audio-direction select { padding: 6px 12px; border-radius: 40px;
-      border: 1px solid var(--border-subtle); background: var(--bg-card);
-      font-size: 14px; outline: none; color: var(--text-primary);
-      transition: background 0.3s, border 0.3s, color 0.3s; }
-
+      border: 1px solid var(--border-subtle); background: var(--bg-card); font-size: 14px;
+      outline: none; color: var(--text-primary); transition: background 0.3s, border 0.3s, color 0.3s; }
     .audio-direction select:focus { border-color: var(--color-accent); }
-
     .compress-options { display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
       margin: 8px 0; padding: 10px 16px; background: var(--bg-compress-options);
       border-radius: 12px; border: 1px solid var(--border-subtle);
       transition: background 0.3s, border 0.3s; }
-
     .compress-options label { font-weight: 500; color: var(--text-secondary);
       font-size: 14px; display: flex; align-items: center; gap: 6px; }
-
     .compress-options input[type="number"] { width: 70px; padding: 6px 10px;
       border-radius: 20px; border: 1px solid var(--border-subtle); font-size: 14px;
-      outline: none; text-align: center; background: var(--bg-card);
-      color: var(--text-primary); transition: background 0.3s, border 0.3s, color 0.3s; }
-
+      outline: none; text-align: center; background: var(--bg-card); color: var(--text-primary);
+      transition: background 0.3s, border 0.3s, color 0.3s; }
     .compress-options input[type="number"]:focus { border-color: var(--color-accent); }
-
     .progress-container { display: none; margin: 12px 0; background: var(--bg-tabs);
       border-radius: 20px; overflow: hidden; height: 30px; }
-
     .progress-bar { height: 100%; background: linear-gradient(90deg, var(--color-accent), var(--color-success));
       color: var(--text-white); text-align: center; line-height: 30px;
       border-radius: 20px; transition: width 0.5s ease; font-weight: bold; font-size: 13px; }
-
     .font-section { margin-top: 20px; border-top: 2px solid var(--border-subtle); padding-top: 16px; }
-
     .font-section-title { font-size: 16px; font-weight: 600; color: var(--text-primary);
       margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
-
     .font-upload-area { background: var(--bg-font-section); border: 2px dashed var(--border-subtle);
-      border-radius: 20px; padding: 16px; text-align: center;
-      cursor: pointer; transition: 0.2s; margin-bottom: 10px;
-      position: relative; color: var(--text-secondary); }
-
+      border-radius: 20px; padding: 16px; text-align: center; cursor: pointer;
+      transition: 0.2s; margin-bottom: 10px; position: relative; color: var(--text-secondary); }
     .font-upload-area:hover { border-color: var(--color-font-badge); background: var(--bg-font-status); }
-    .font-upload-area.dragover { border-color: var(--color-font-badge);
-      background: var(--bg-font-status); box-shadow: 0 0 0 4px rgba(107, 74, 142, 0.15); }
-
+    .font-upload-area.dragover { border-color: var(--color-font-badge); background: var(--bg-font-status);
+      box-shadow: 0 0 0 4px rgba(107, 74, 142, 0.15); }
     .font-upload-area input[type="file"] { position: absolute; top: 0; left: 0;
       width: 100%; height: 100%; opacity: 0; cursor: pointer; }
-
     .font-file-status { display: flex; align-items: center; justify-content: space-between;
       background: var(--bg-font-status); padding: 6px 16px; border-radius: 60px;
       margin: 4px 0 10px; flex-wrap: wrap; }
-
-    .font-file-name { font-weight: 500; color: var(--text-primary);
-      overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 300px; }
-
+    .font-file-name { font-weight: 500; color: var(--text-primary); overflow: hidden;
+      text-overflow: ellipsis; white-space: nowrap; max-width: 300px; }
     .font-badge { background: var(--color-font-badge); color: var(--text-white);
       border-radius: 40px; padding: 3px 12px; font-size: 13px; font-weight: 500; }
-
     .encrypt-options { margin: 8px 0 12px; padding: 10px 16px;
       background: var(--bg-compress-options); border-radius: 12px;
       border: 1px solid var(--border-subtle); display: flex; flex-wrap: wrap;
       align-items: center; gap: 12px 20px; }
-
     .encrypt-options label { font-weight: 500; color: var(--text-secondary);
       font-size: 14px; display: flex; align-items: center; gap: 6px; }
-
     .encrypt-options select, .encrypt-options input[type="text"] { padding: 6px 12px;
       border-radius: 20px; border: 1px solid var(--border-subtle); font-size: 14px;
       outline: none; background: var(--bg-card); color: var(--text-primary);
       transition: background 0.3s, border 0.3s; }
-
     .encrypt-options select:focus, .encrypt-options input[type="text"]:focus { border-color: var(--color-accent); }
-
-    .file-list { margin-top: 8px; max-height: 180px; overflow-y: auto;
-      border-radius: 12px; border: 1px solid var(--border-subtle);
-      background: var(--bg-encrypt-drop); padding: 4px 0; display: none;
-      transition: background 0.3s, border 0.3s; }
-
+    .file-list { margin-top: 8px; max-height: 180px; overflow-y: auto; border-radius: 12px;
+      border: 1px solid var(--border-subtle); background: var(--bg-encrypt-drop);
+      padding: 4px 0; display: none; transition: background 0.3s, border 0.3s; }
     .file-list.show { display: block; }
-
     .file-item { display: flex; align-items: center; justify-content: space-between;
       padding: 6px 14px; border-bottom: 1px solid var(--border-subtle);
       font-size: 0.9rem; color: var(--text-primary); }
-
     .file-item:last-child { border-bottom: none; }
     .file-item .info { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
-    .file-item .name { font-weight: 500; word-break: break-all;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .file-item .name { font-weight: 500; word-break: break-all; white-space: nowrap;
+      overflow: hidden; text-overflow: ellipsis; }
     .file-item .size { color: var(--text-light); font-size: 0.8rem; flex-shrink: 0; }
-    .file-item .status { font-size: 0.75rem; padding: 2px 10px;
-      border-radius: 30px; background: var(--bg-tabs); color: var(--text-muted); flex-shrink: 0; }
+    .file-item .status { font-size: 0.75rem; padding: 2px 10px; border-radius: 30px;
+      background: var(--bg-tabs); color: var(--text-muted); flex-shrink: 0; }
     .file-item .status.done { background: var(--color-success-bg); color: var(--color-success); }
     .file-item .status.error { background: var(--color-error-bg); color: #a52a3a; }
     .file-item .remove-btn { background: transparent; border: none; color: var(--text-light);
       font-size: 1rem; cursor: pointer; padding: 0 4px; transition: color 0.2s; flex-shrink: 0; }
     .file-item .remove-btn:hover { color: #c0392b; }
-
     .file-item .single-download-btn { background: transparent; border: none;
-      color: var(--color-accent); font-size: 1rem; cursor: pointer;
-      padding: 0 6px; transition: color 0.2s; flex-shrink: 0; font-weight: 600; }
-
+      color: var(--color-accent); font-size: 1rem; cursor: pointer; padding: 0 6px;
+      transition: color 0.2s; flex-shrink: 0; font-weight: 600; }
     .file-item .single-download-btn:hover { color: var(--color-accent-dark); }
     .file-item .single-download-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-
     .encrypt-file-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
-
     .audio-replace-area { background: var(--bg-audio-replace); border: 2px dashed var(--border-subtle);
-      border-radius: 20px; padding: 14px 16px; text-align: center;
-      cursor: pointer; transition: 0.2s; margin: 8px 0 4px; color: var(--text-secondary); }
-
+      border-radius: 20px; padding: 14px 16px; text-align: center; cursor: pointer;
+      transition: 0.2s; margin: 8px 0 4px; color: var(--text-secondary); }
     .audio-replace-area:hover { border-color: #4a8e6b; background: var(--bg-audio-replace); }
-    .audio-replace-area.dragover { border-color: #4a8e6b;
-      background: var(--bg-audio-replace); box-shadow: 0 0 0 4px rgba(74, 142, 107, 0.15); }
-
+    .audio-replace-area.dragover { border-color: #4a8e6b; background: var(--bg-audio-replace);
+      box-shadow: 0 0 0 4px rgba(74, 142, 107, 0.15); }
     .audio-replace-status { display: flex; align-items: center; justify-content: space-between;
       background: var(--bg-audio-replace); padding: 4px 16px; border-radius: 60px;
       margin: 4px 0 8px; flex-wrap: wrap; }
-
     .audio-replace-status .file-name { font-weight: 500; color: var(--text-primary);
       overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px; }
-
     .audio-replace-status .badge { background: #4a8e6b; color: var(--text-white);
       border-radius: 40px; padding: 3px 12px; font-size: 13px; font-weight: 500; }
-
-    .operation-options { display: flex; flex-wrap: wrap; gap: 16px 24px;
-      margin: 10px 0 14px; padding: 12px 16px;
-      background: var(--bg-compress-options); border-radius: 12px;
+    .operation-options { display: flex; flex-wrap: wrap; gap: 16px 24px; margin: 10px 0 14px;
+      padding: 12px 16px; background: var(--bg-compress-options); border-radius: 12px;
       border: 1px solid var(--border-subtle); transition: background 0.3s, border 0.3s; }
-
     .operation-options label { display: flex; align-items: center; gap: 6px;
       font-weight: 500; color: var(--text-secondary); font-size: 14px; cursor: pointer; }
-
     .operation-options input[type="checkbox"] { width: 16px; height: 16px;
       accent-color: var(--color-accent); cursor: pointer; }
-
     @media (max-width: 480px) {
-      .card { padding: 16px; }
-      .row-label { min-width: 60px; }
+      .card { padding: 16px; } .row-label { min-width: 60px; }
       .action-btn { min-width: 100px; font-size: 14px; padding: 10px 16px; }
       .main-tab { min-width: 60px; font-size: 12px; padding: 8px 0; }
     }
-
-    /* 融彩转换 专属样式 */
-    #modePanel { border: 1px solid var(--border-subtle); border-radius: 10px;
-      padding: 10px; background: var(--bg-card); margin-bottom: 15px; }
+    #modePanel { border: 1px solid var(--border-subtle); border-radius: 10px; padding: 10px;
+      background: var(--bg-card); margin-bottom: 15px; }
     #modePanel strong { color: var(--text-primary); }
-    .mode-btn { padding: 6px 14px; border: none; border-radius: 40px;
-      background: #2e3b4e; color: #fff; font-size: 13px; font-weight: 500;
-      cursor: pointer; margin: 4px 4px 4px 0;
+    .mode-btn { padding: 6px 14px; border: none; border-radius: 40px; background: #2e3b4e;
+      color: #fff; font-size: 13px; font-weight: 500; cursor: pointer; margin: 4px 4px 4px 0;
       transition: background 0.2s, transform 0.1s; letter-spacing: 0.3px; }
     .mode-btn:hover:not(:disabled) { background: #4a5a72; transform: scale(0.97); }
     .mode-btn.active-mode { background: #ff8c00; }
     .mode-btn.active-mode:hover { background: #e07a00; }
     #modeDescription { margin-top: 10px; margin-bottom: 0; font-size: 13px;
-      color: var(--text-secondary); background: var(--bg-subtle);
-      padding: 8px 14px; border-radius: 10px; border-left: 4px solid var(--color-accent); }
+      color: var(--text-secondary); background: var(--bg-subtle); padding: 8px 14px;
+      border-radius: 10px; border-left: 4px solid var(--color-accent); }
     .action-btn.rongcai { background: #8a5a7a; color: white; }
     .action-btn.rongcai:hover:not(:disabled) { background: #6a4a5a; }
     .rongcai-badge { background: #8a5a7a; color: white; }
-
-    /* 打标工具行内样式 */
-    .mark-inline-row { display: flex; flex-wrap: wrap; gap: 10px 16px;
-      align-items: center; margin: 6px 0 10px; padding: 8px 14px;
-      background: var(--bg-subtle); border-radius: 12px;
-      border: 1px solid var(--border-subtle); }
+    .mark-inline-row { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center;
+      margin: 6px 0 10px; padding: 8px 14px; background: var(--bg-subtle);
+      border-radius: 12px; border: 1px solid var(--border-subtle); }
     .mark-inline-row label { font-weight: 500; color: var(--text-secondary);
       font-size: 14px; display: flex; align-items: center; gap: 6px; }
-    .mark-inline-row input[type="text"] { flex: 1; min-width: 140px;
-      padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border-subtle);
-      font-size: 14px; outline: none; background: var(--bg-card);
-      color: var(--text-primary); transition: border 0.2s, background 0.3s; }
+    .mark-inline-row input[type="text"] { flex: 1; min-width: 140px; padding: 6px 12px;
+      border-radius: 20px; border: 1px solid var(--border-subtle); font-size: 14px;
+      outline: none; background: var(--bg-card); color: var(--text-primary);
+      transition: border 0.2s, background 0.3s; }
     .mark-inline-row input[type="text"]:focus { border-color: var(--color-accent); }
-    .mark-inline-btn { padding: 6px 16px; border: none; border-radius: 20px;
-      font-size: 13px; font-weight: 600; cursor: pointer;
-      transition: all 0.2s; white-space: nowrap; }
+    .mark-inline-btn { padding: 6px 16px; border: none; border-radius: 20px; font-size: 13px;
+      font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
     .mark-inline-btn:disabled { opacity: 0.4; cursor: not-allowed; }
     .mark-inline-btn.mark-write { background: #00cc66; color: #000; }
     .mark-inline-btn.mark-write:hover:not(:disabled) { background: #00b355; transform: scale(0.97); }
@@ -462,22 +292,18 @@
     .mark-inline-btn.mark-check:hover:not(:disabled) { background: #00dd77; transform: scale(0.97); }
     .mark-inline-btn.mark-download { background: #ffaa00; color: #000; }
     .mark-inline-btn.mark-download:hover:not(:disabled) { background: #dd9900; transform: scale(0.97); }
-    .mark-status { font-size: 12px; color: var(--text-light);
-      padding: 2px 10px; border-radius: 12px; background: var(--bg-tabs); }
+    .mark-status { font-size: 12px; color: var(--text-light); padding: 2px 10px;
+      border-radius: 12px; background: var(--bg-tabs); }
     .mark-status.done { color: var(--color-success); background: var(--color-success-bg); }
     .mark-result-inline { display: none; margin-top: 6px; padding: 8px 14px;
-      background: var(--bg-extract); border-radius: 8px;
-      border: 1px solid var(--border-subtle); font-size: 13px;
-      color: var(--text-secondary); line-height: 1.8; }
+      background: var(--bg-extract); border-radius: 8px; border: 1px solid var(--border-subtle);
+      font-size: 13px; color: var(--text-secondary); line-height: 1.8; }
     .mark-result-inline.show { display: block; }
     .mark-result-inline .found { color: var(--color-success); font-weight: bold; }
     .mark-result-inline .not-found { color: #ff4444; font-weight: bold; }
-    .mark-copy-btn {
-      background: #fff; color: #15803d; border: 1px solid #bbf7d0;
-      border-radius: 6px; padding: 4px 10px; font-size: 12px;
-      cursor: pointer; font-weight: 500; white-space: nowrap;
-      margin-left: 8px; transition: background .15s;
-    }
+    .mark-copy-btn { background: #fff; color: #15803d; border: 1px solid #bbf7d0;
+      border-radius: 6px; padding: 4px 10px; font-size: 12px; cursor: pointer;
+      font-weight: 500; white-space: nowrap; margin-left: 8px; transition: background .15s; }
     .mark-copy-btn:hover { background: #dcfce7; }
     .mark-copy-btn.copied { background: #15803d; color: #fff; border-color: #15803d; }
   </style>
@@ -487,14 +313,12 @@
     <h1>⌨️ 百度输入法 · 综合工具</h1>
     <div class="sub">图片压缩 · 皮肤双向转换 · 溯源秘标 · 加密/解密 · 音效处理 · 字体打标 · 融彩转换</div>
 
-    <!-- 主功能区切换 -->
     <div class="main-tabs" id="mainTabs">
       <button class="main-tab active" data-section="skin">🎨 皮肤工具</button>
       <button class="main-tab" data-section="encrypt">🔐 加密/解密</button>
       <button class="main-tab" data-section="rongcai">🌈 融彩转换</button>
     </div>
 
-    <!-- ===================== 皮肤工具 ===================== -->
     <div class="section active" id="sectionSkin">
       <div class="compress-options">
         <label>目标压缩率: <input type="number" id="targetCompressRate" value="65" min="30" max="90">%</label>
@@ -553,7 +377,6 @@
         </div>
       </div>
 
-      <!-- ===== 打标/查标工具行 ===== -->
       <div class="mark-inline-row">
         <label>🔒 隐形标记 <span style="font-weight:400;color:var(--text-light);font-size:12px;">(微信号/QQ)</span></label>
         <input type="text" id="markText" placeholder="填写标记内容，不填则不打标" maxlength="120">
@@ -567,7 +390,6 @@
         <span id="resultContent"></span>
       </div>
 
-      <!-- ===== 操作选项组 ===== -->
       <div class="operation-options" id="operationOptions">
         <label><input type="checkbox" id="optMark"> 🔏 打标（溯源标记）</label>
         <label><input type="checkbox" id="optReplaceDemo"> 🖼️ 替换 demo.png</label>
@@ -607,13 +429,11 @@
       </div>
     </div>
 
-    <!-- ===================== 加密/解密 ===================== -->
     <div class="section" id="sectionEncrypt">
       <div class="mode-tabs" id="encryptModeTabs">
         <button class="mode-tab active" data-encrypt-mode="encrypt">🔐 加密</button>
         <button class="mode-tab" data-encrypt-mode="decrypt">🔓 解密</button>
       </div>
-
       <div class="encrypt-options" id="encryptOptionGroup">
         <label>
           <input type="radio" name="encryptType" value="bdiOnly" checked>
@@ -626,24 +446,19 @@
           <span style="font-weight:400;color:var(--text-light);">—— .bds 用 BDS 方式，.bdi / .zip 用伪加密</span>
         </label>
       </div>
-
       <div class="upload-area" id="encryptDropZone">
         <span class="upload-icon" id="encryptDropIcon">📂</span>
         <div class="upload-text">拖拽文件到这里，或 <span style="color:var(--color-accent);font-weight:600;">点击选择多个文件</span></div>
         <div class="upload-hint">支持 .zip .bds .bdi 批量上传</div>
         <input type="file" id="encryptFileInput" accept=".zip,.bds,.bdi,application/zip,application/octet-stream,application/x-zip-compressed" multiple>
       </div>
-
       <div class="file-list" id="encryptFileList"></div>
-
       <div class="encrypt-file-actions">
         <button class="action-btn encrypt-btn" id="encryptActionBtn" disabled>🔐 批量加密</button>
         <button class="action-btn secondary" id="encryptDownloadAllBtn" disabled>📦 打包下载全部</button>
         <button class="action-btn secondary" id="encryptClearBtn">🗑️ 清空</button>
       </div>
-
       <div class="log-box" id="encryptLogBox"></div>
-
       <div style="margin-top:12px;padding:10px 16px;background:var(--bg-subtle);border-radius:14px;font-size:0.78rem;color:var(--text-light);border-left:4px solid var(--color-accent);transition:background 0.3s;">
         <strong>📘 使用说明：</strong><br>
         • 单个文件处理完成后，点击文件名右侧的 <strong>「⬇ 下载」</strong> 即可单独下载。<br>
@@ -653,7 +468,6 @@
       </div>
     </div>
 
-    <!-- ===================== 融彩转换 ===================== -->
     <div class="section" id="sectionRongcai">
       <div id="modePanel">
         <strong>请选择加工模式：</strong><br>
@@ -664,13 +478,11 @@
           当前模式：<strong>融合底转彩底</strong>。采样左边缘中点颜色，铺满底部并保留羽化。
         </div>
       </div>
-
       <div class="upload-area" id="rongcaiDropBox">
         <p style="margin-bottom: 6px; font-weight: 450;">📁 拖拽或批量导入 <strong>.bdi / .bds / .zip</strong> 到此处</p>
         <input type="file" id="rongcaiFileInput" accept=".bdi,.bds,.zip,application/zip,application/octet-stream" multiple hidden>
         <button onclick="document.getElementById('rongcaiFileInput').click()" style="background:#2e3b4e; border:none; padding:8px 20px; border-radius:40px; color:#fff; font-weight:500; cursor:pointer;">选择文件 (支持多选)</button>
       </div>
-
       <div class="action-row">
         <button class="action-btn rongcai" id="rongcaiProcBtn" disabled onclick="startRongcaiProcess()">▶ 开始处理</button>
         <button class="action-btn secondary" id="rongcaiDlBtn" disabled onclick="triggerRongcaiDownload()">⬇ 下载处理后文件</button>
@@ -679,7 +491,6 @@
       <div class="log-box" id="rongcaiLog">📋 日志区域 · 拖入文件开始</div>
     </div>
 
-    <!-- ===================== 字体打标 ===================== -->
     <div class="font-section">
       <div class="font-section-title">🔤 字体溯源打标 (TTF/OTF)</div>
       <div class="font-upload-area" id="fontDropZone">
@@ -720,7 +531,6 @@
         encrypt: document.getElementById('sectionEncrypt'),
         rongcai: document.getElementById('sectionRongcai')
       };
-
       mainTabs.forEach(tab => {
         tab.addEventListener('click', function() {
           mainTabs.forEach(t => t.classList.remove('active'));
@@ -786,7 +596,6 @@
       const fontExtractResult = document.getElementById('fontExtractResult');
       const fontExtractContent = document.getElementById('fontExtractContent');
 
-      // ===== 打标工具DOM =====
       const markText = document.getElementById('markText');
       const btnMark = document.getElementById('btnMark');
       const btnCheck = document.getElementById('btnCheck');
@@ -795,7 +604,6 @@
       const checkResult = document.getElementById('checkResult');
       const resultContent = document.getElementById('resultContent');
 
-      // ===== 状态变量 =====
       let selectedFiles = [];
       let compressedFiles = [];
       let customDemoFile = null;
@@ -808,12 +616,18 @@
       let audioReplaceZipBlob = null;
       let audioReplaceFiles = [];
 
-      // ===== 打标系统状态 =====
       let savedMarkContent = '';
       let isMarked = false;
 
       /* =========================================================
-       *  打标核心：Base36 短码 + 伪装组
+       *  打标核心
+       *  - 只打非 txt、非 png 的文本类文件
+       *  - 每个文件末尾追加一个新分组
+       *  - 段名和原文件里的段名长度相近、字母不重样
+       *  - 键名和原键名长度相近、字母不重样
+       *  - 值模仿原值形态，藏的是原文的 Base36 短码
+       *  - 无任何符号
+       *  - 查标时只读每个文件最后一个段，避免把原文件内容当成标记
        * ========================================================= */
       const B36 = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
@@ -842,155 +656,161 @@
           return new TextDecoder('utf-8', { fatal: true }).decode(new Uint8Array(bytes));
         } catch { return null; }
       }
-
-      function makeValue(text, refValue, rng) {
-        const code = textToCode(text);
-        if (/^\d+(,\d+)+$/.test(refValue)) {
-          const parts = refValue.split(',');
-          const count = parts.length;
-          if (code.length <= count) return code;
-          const per = Math.ceil(code.length / count);
-          const chunks = [];
-          for (let i = 0; i < count; i++) chunks.push(code.slice(i * per, (i + 1) * per) || '0');
-          return chunks.join(',');
-        }
-        if (/^\d+$/.test(refValue)) {
-          let out = '';
-          for (const c of code) out += (B36.indexOf(c) % 10);
-          return (code.length % 10) + out;
-        }
-        if (/^\d+,[0-9a-zA-Z]+$/.test(refValue)) {
-          return `${Math.floor(rng() * 90 + 10)},${code}`;
-        }
-        if (/^[0-9a-zA-Z]{1,6}$/.test(refValue)) {
-          const a = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-          return a[Math.floor(rng() * 26)] + code;
-        }
-        return code;
-      }
-
-      function valueToText(val) {
-        val = String(val || '').trim();
-        if (!val) return null;
-        if (/^\d+(,\d+)+$/.test(val)) {
-          const parts = val.split(',');
-          let code = parts.join('');
-          let t = codeToText(code);
-          if (t && isValidMark(t)) return t;
-          code = parts.map(p => {
-            let n = 0n;
-            for (const c of p) {
-              const v = B36.indexOf(c);
-              if (v < 0) return p;
-              n = n * 36n + BigInt(v);
-            }
-            if (n === 0n) return '0';
-            let s = '';
-            while (n > 0n) { s = B36[Number(n % 36n)] + s; n = n / 36n; }
-            return s;
-          }).join('');
-          t = codeToText(code);
-          if (t && isValidMark(t)) return t;
-          return null;
-        }
-        if (/^\d+$/.test(val)) {
-          let t = codeToText(val);
-          if (t && isValidMark(t)) return t;
-          if (val.length > 1) {
-            t = codeToText(val.slice(1));
-            if (t && isValidMark(t)) return t;
-          }
-          return null;
-        }
-        const m1 = val.match(/^\d{1,3},([0-9A-Z]+)$/);
-        if (m1) {
-          const t = codeToText(m1[1]);
-          if (t && isValidMark(t)) return t;
-        }
-        if (/^[A-Z][0-9A-Z]+$/.test(val)) {
-          const t = codeToText(val.slice(1));
-          if (t && isValidMark(t)) return t;
-        }
-        if (/^[0-9A-Z]+$/.test(val)) {
-          const t = codeToText(val);
-          if (t && isValidMark(t)) return t;
-        }
-        return null;
-      }
       function isValidMark(t) {
         return t && t.length >= 2 && t.length <= 120 &&
           /^[\x20-\x7E\u4e00-\u9fa5\u3000-\u303f\uff00-\uffef]+$/.test(t);
       }
 
-      function newSectionName(origName, existing, rng) {
-        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        const cands = [];
-        const m = origName.match(/^([A-Za-z_]+)(\d*)$/);
-        const prefix = m ? m[1] : origName;
-        for (let t = 0; t < 6; t++) {
-          const pos = Math.floor(rng() * (prefix.length + 1));
-          const ch = letters[Math.floor(rng() * 26)];
-          cands.push(prefix.slice(0, pos) + ch + prefix.slice(pos));
-        }
-        if (prefix.length > 2) {
-          for (let t = 0; t < 6; t++) {
-            const pos = Math.floor(rng() * prefix.length);
-            cands.push(prefix.slice(0, pos) + prefix.slice(pos + 1));
-          }
-        }
-        const finals = [];
-        for (const c of cands) {
-          if (!c || c === prefix) continue;
-          finals.push(c);
-          finals.push(c + Math.floor(rng() * 900 + 100));
-        }
-        for (const c of finals) {
-          if (!c || c === origName) continue;
-          if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(c)) continue;
-          if (existing.has(c)) continue;
-          return c;
-        }
-        let n = 1;
-        while (existing.has(prefix + n)) n++;
-        return prefix + n;
+      function makeRng(seed) {
+        let s = seed >>> 0;
+        if (s === 0) s = 0x9e3779b9;
+        return function () {
+          s ^= s << 13; s >>>= 0;
+          s ^= s >>> 17;
+          s ^= s << 5; s >>>= 0;
+          return s / 0xffffffff;
+        };
       }
 
-      function disguiseKey(orig, used, rng) {
-        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        const cands = [];
-        for (let t = 0; t < 5; t++) {
-          const pos = 1 + Math.floor(rng() * (orig.length - 1));
-          const ch = letters[Math.floor(rng() * 26)];
-          cands.push(orig.slice(0, pos) + ch + orig.slice(pos));
+      /* 值：模仿原值形态，把 Base36 短码塞进去 */
+      function makeValue(text, refValue, rng) {
+        const code = textToCode(text);
+
+        // 数字型：直接写 Base36 短码（含字母也可，解析器不认）
+        if (/^\d+$/.test(refValue)) {
+          // 保持是数字或短字母混合，长度接近参考值
+          const targetLen = Math.max(2, Math.min(12, refValue.length));
+          if (code.length <= targetLen) return code;
+          return code.slice(0, targetLen) + code.slice(-2);
         }
-        if (orig.length > 3) {
-          for (let t = 0; t < 5; t++) {
-            const pos = 1 + Math.floor(rng() * (orig.length - 1));
-            cands.push(orig.slice(0, pos) + orig.slice(pos + 1));
+
+        // 坐标型：切成 N 段，每段是 Base36 短码的一部分
+        if (/^\d+(,\d+)+$/.test(refValue)) {
+          const parts = refValue.split(',');
+          const count = parts.length;
+          const per = Math.max(1, Math.ceil(code.length / count));
+          const chunks = [];
+          for (let i = 0; i < count; i++) {
+            chunks.push(code.slice(i * per, (i + 1) * per) || '0');
           }
+          return chunks.join(',');
         }
-        if (orig.length > 4) {
-          for (let t = 0; t < 4; t++) {
-            const pos1 = 1 + Math.floor(rng() * (orig.length - 1));
-            const pos2 = 1 + Math.floor(rng() * (orig.length - 2));
-            const ch = letters[Math.floor(rng() * 26)];
-            const tmp = orig.slice(0, pos1) + orig.slice(pos1 + 1);
-            cands.push(tmp.slice(0, pos2) + ch + tmp.slice(pos2));
-          }
+
+        // "数字,字母数字"
+        if (/^\d+,[0-9a-zA-Z]+$/.test(refValue)) {
+          return `${Math.floor(rng() * 90 + 10)},${code}`;
         }
-        for (const c of cands) {
-          if (!c || c === orig) continue;
-          if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(c)) continue;
-          if (used.has(c)) continue;
-          used.add(c);
-          return c;
+
+        // 短值：加一个字母前缀 + code
+        if (/^[0-9a-zA-Z]{1,6}$/.test(refValue)) {
+          const a = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+          return a[Math.floor(rng() * 26)] + code;
         }
-        let n = 1;
-        while (used.has(orig + n)) n++;
-        used.add(orig + n);
-        return orig + n;
+
+        return code;
       }
 
+      /* 从值里还原原文（严格模式，只按我们生成时的几种固定形态） */
+      function valueToText(val) {
+        val = String(val || '').trim();
+        if (!val) return null;
+
+        // 坐标型：每段是 Base36 的一部分，直接拼接还原
+        if (/^[0-9A-Z]+(,[0-9A-Z]+)+$/.test(val)) {
+          const code = val.split(',').join('');
+          const t = codeToText(code);
+          if (t && isValidMark(t)) return t;
+          return null;
+        }
+
+        // "数字,字母数字"
+        const m1 = val.match(/^\d{1,3},([0-9A-Z]+)$/);
+        if (m1) {
+          const t = codeToText(m1[1]);
+          if (t && isValidMark(t)) return t;
+        }
+
+        // 字母前缀 + Base36
+        if (/^[A-Z][0-9A-Z]+$/.test(val)) {
+          const t = codeToText(val.slice(1));
+          if (t && isValidMark(t)) return t;
+        }
+
+        // 纯 Base36
+        if (/^[0-9A-Z]+$/.test(val)) {
+          const t = codeToText(val);
+          if (t && isValidMark(t)) return t;
+        }
+
+        return null;
+      }
+
+      /* 生成与原段名长度相近、字母完全不重样的新段名 */
+      function newSectionName(origSection, existingNames, rng) {
+        const m = origSection.match(/^([A-Za-z]+)/);
+        const refLen = m ? Math.min(5, Math.max(2, m[1].length)) : 3;
+
+        const usedLetters = new Set();
+        for (const s of existingNames) {
+          for (const ch of s) if (/[A-Za-z]/.test(ch)) usedLetters.add(ch.toUpperCase());
+        }
+        const available = [];
+        for (let i = 0; i < 26; i++) {
+          const ch = String.fromCharCode(65 + i);
+          if (!usedLetters.has(ch)) available.push(ch);
+        }
+        if (available.length < refLen + 2) {
+          for (let i = 0; i < 26; i++) available.push(String.fromCharCode(65 + i));
+        }
+
+        for (let attempt = 0; attempt < 200; attempt++) {
+          const len = refLen + (rng() < 0.4 ? 1 : 0) - (rng() < 0.2 ? 1 : 0);
+          const finalLen = Math.max(2, Math.min(5, len));
+          let name = '';
+          for (let i = 0; i < finalLen; i++) {
+            name += available[Math.floor(rng() * available.length)];
+          }
+          // 加一个短数字后缀
+          if (rng() < 0.7) name += Math.floor(rng() * 900 + 100);
+          if (existingNames.includes(name)) continue;
+          return name;
+        }
+        return 'XZ' + Math.floor(rng() * 9000 + 1000);
+      }
+
+      /* 生成与原键名长度相近、字母不重样的新键名 */
+      function disguiseKey(orig, usedKeys, rng) {
+        const refLen = Math.max(2, Math.min(10, orig.length));
+        const usedLetters = new Set();
+        for (const ch of orig) if (/[A-Za-z]/.test(ch)) usedLetters.add(ch.toUpperCase());
+
+        const available = [];
+        for (let i = 0; i < 26; i++) {
+          const ch = String.fromCharCode(65 + i);
+          if (!usedLetters.has(ch)) available.push(ch);
+        }
+        if (available.length < 2) {
+          for (let i = 0; i < 26; i++) available.push(String.fromCharCode(65 + i));
+        }
+
+        for (let attempt = 0; attempt < 200; attempt++) {
+          let len = refLen + (rng() < 0.3 ? 1 : 0) - (rng() < 0.3 ? 1 : 0);
+          len = Math.max(2, Math.min(12, len));
+          let name = available[Math.floor(rng() * available.length)];
+          for (let i = 1; i < len; i++) {
+            name += available[Math.floor(rng() * available.length)];
+          }
+          if (usedKeys.has(name)) continue;
+          usedKeys.add(name);
+          return name;
+        }
+        let n = 1;
+        while (usedKeys.has('ZK' + n)) n++;
+        usedKeys.add('ZK' + n);
+        return 'ZK' + n;
+      }
+
+      /* 分析最后一组的形态（供 makeValue 参考） */
       function analyzeLastStyle(text) {
         const sections = [...text.matchAll(/^\[([A-Za-z0-9_]+)\]\s*$/gm)];
         if (sections.length === 0) return null;
@@ -1009,24 +829,25 @@
         return { sectionName: lastSec[1], kv, allSections: sections.map(s => s[1]) };
       }
 
+      /* 生成伪装组 */
       function buildCamouflage(styleInfo, items, rng) {
-        const existing = new Set(styleInfo ? styleInfo.allSections : []);
+        const existingSections = styleInfo ? styleInfo.allSections : [];
         const newSec = styleInfo
-          ? newSectionName(styleInfo.sectionName, existing, rng)
+          ? newSectionName(styleInfo.sectionName, existingSections, rng)
           : 'SK' + Math.floor(rng() * 900 + 100);
 
-        const used = new Set();
+        const usedKeys = new Set();
         const lines = [`[${newSec}]`];
         for (let i = 0; i < items.length; i++) {
           let key, ref;
           if (styleInfo && styleInfo.kv.length > 0) {
             ref = styleInfo.kv[i % styleInfo.kv.length];
-            key = disguiseKey(ref.key, used, rng);
+            key = disguiseKey(ref.key, usedKeys, rng);
           } else {
             key = 'V' + Math.floor(rng() * 90 + 10);
             ref = { value: '0' };
-            while (used.has(key)) key = 'V' + Math.floor(rng() * 90 + 10);
-            used.add(key);
+            while (usedKeys.has(key)) key = 'V' + Math.floor(rng() * 90 + 10);
+            usedKeys.add(key);
           }
           const val = makeValue(items[i].value, ref.value, rng);
           lines.push(`${key}=${val}`);
@@ -1069,19 +890,9 @@
         }
         return true;
       }
-      function makeRng(seed) {
-        let s = seed >>> 0;
-        if (s === 0) s = 0x9e3779b9;
-        return function () {
-          s ^= s << 13; s >>>= 0;
-          s ^= s >>> 17;
-          s ^= s << 5; s >>>= 0;
-          return s / 0xffffffff;
-        };
-      }
       function appendGroupMark(text, camo) {
         let t = text.replace(/\n+$/, '');
-        t += '\n' + camo;
+        t += '\n\n' + camo;
         return t;
       }
 
@@ -1106,6 +917,7 @@
         return zip;
       }
 
+      /* 查标：只读每个文件最后一个段下的键值对 */
       async function scanMarkFromZip(zip) {
         const names = Object.keys(zip.files).filter(n => !zip.files[n].dir);
         const found = new Set();
@@ -1117,14 +929,18 @@
           try { text = new TextDecoder('utf-8', { fatal: true }).decode(buf); }
           catch { continue; }
 
+          // 找文件中最后一个 [XXX] 段
           const sections = [...text.matchAll(/^\[([A-Za-z0-9_]+)\]\s*$/gm)];
           if (sections.length === 0) continue;
           const last = sections[sections.length - 1];
           const tail = text.slice(last.index + last[0].length);
+
+          // 只读最后一段下的键值对
           for (const line of tail.split(/\r?\n/)) {
+            if (/^\s*\[/.test(line)) break;
             const m = line.match(/^([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.+)$/);
             if (!m) continue;
-            const t = valueToText(m[2]);
+            const t = valueToText(m[2].trim());
             if (t) found.add(t);
           }
         }
@@ -1225,17 +1041,13 @@
         }
       }
 
-      // ===== 打标按钮 =====
       btnMark.addEventListener('click', async () => {
         const markValue = markText.value.trim();
         if (!markValue) { alert('请输入标记内容！'); return; }
-
         const files = getFilesToProcess();
         if (!files || files.length === 0) { alert('请先上传皮肤包文件！'); return; }
-
         btnMark.disabled = true;
         btnMark.textContent = '⏳ 打标中...';
-
         try {
           const items = parseMarkInput(markValue);
           if (items.length === 0) { alert('标记内容无效'); return; }
@@ -1246,15 +1058,12 @@
             markedFiles.push(markedFile);
             log('✅ [' + (i + 1) + '/' + files.length + '] 打标成功: ' + file.name);
           }
-
           savedMarkContent = markValue;
           isMarked = true;
-
           selectedFiles = markedFiles;
           compressedFiles = [];
           isCompressed = false;
           updateFileStatus(selectedFiles);
-
           markStatus.textContent = '✅ ' + files.length + ' 个文件标记已植入: ' + markValue;
           markStatus.className = 'mark-status done';
           btnDownloadMarked.disabled = false;
@@ -1268,20 +1077,16 @@
         }
       });
 
-      // ===== 查标按钮 =====
       btnCheck.addEventListener('click', async () => {
         const files = getFilesToProcess();
         if (!files || files.length === 0) { alert('请先上传要查验的皮肤包文件！'); return; }
-
         btnCheck.disabled = true;
         btnCheck.textContent = '⏳ 扫描中...';
         checkResult.classList.remove('show');
-
         try {
           const file = files[0];
           const marks = await checkMarkFromFile(file);
           checkResult.classList.add('show');
-
           if (marks.length > 0) {
             resultContent.innerHTML = marks.map((t) =>
               `<div style="margin-top:6px;">
@@ -1307,7 +1112,6 @@
         }
       });
 
-      // ===== 复制标记 =====
       window.copyMarkText = function(btn) {
         const text = btn.getAttribute('data-copy');
         const done = () => {
@@ -1340,11 +1144,9 @@
         }[c]));
       }
 
-      // ===== 下载打标文件 =====
       btnDownloadMarked.addEventListener('click', async () => {
         const files = getFilesToProcess();
         if (!files || files.length === 0) { alert('请先打标！'); return; }
-
         if (files.length === 1) {
           const file = files[0];
           const url = URL.createObjectURL(file);
@@ -1358,7 +1160,6 @@
           log('📥 已下载: ' + file.name);
           return;
         }
-
         try {
           log('📦 正在打包 ' + files.length + ' 个文件...');
           const zip = new JSZip();
@@ -1372,28 +1173,22 @@
         }
       });
 
-      // ===== 执行选中操作 =====
       executeSelectedBtn.addEventListener('click', async function() {
         const files = getFilesToProcess();
         if (!files || files.length === 0) { alert('请先上传皮肤包文件'); return; }
-
         const doMark = optMark.checked && markText.value.trim().length > 0;
         const doReplaceDemo = optReplaceDemo.checked && customDemoBlob;
         const doConvert = optConvert.checked && (currentMode === 'bds2bdi' || currentMode === 'bdi2bds');
         const doCompress = optCompress.checked;
-
         if (!doMark && !doReplaceDemo && !doConvert && !doCompress) { alert('请至少勾选一个有效操作'); return; }
         if (doMark && !markText.value.trim()) { alert('勾选了打标但未填写标记内容'); return; }
         if (doReplaceDemo && !customDemoBlob) { alert('勾选了替换demo但未上传图片'); return; }
         if (doConvert && currentMode !== 'bds2bdi' && currentMode !== 'bdi2bds') { alert('当前模式不支持转换'); return; }
-
         executeSelectedBtn.disabled = true;
         executeSelectedBtn.textContent = '⏳ 处理中...';
         clearLog();
-
         const markContent = markText.value.trim();
         if (doMark && markContent) { savedMarkContent = markContent; isMarked = true; }
-
         log('▶ 执行选中操作: ' +
           (doMark ? '打标 ' : '') +
           (doReplaceDemo ? '替换demo ' : '') +
@@ -1401,7 +1196,6 @@
           (doCompress ? '压缩 ' : '')
         );
         if (savedMarkContent) log('🔒 标记内容: ' + savedMarkContent);
-
         try {
           await processFilesWithOptions(files, { doMark, doReplaceDemo, doConvert, doCompress, markContent });
         } catch (err) {
@@ -1414,20 +1208,17 @@
 
       async function processFilesWithOptions(files, options) {
         const { doMark, doReplaceDemo, doConvert, doCompress, markContent } = options;
-
         if (doCompress) {
           await compressImagesInternal(files);
           files = getFilesToProcess();
         }
         if (files.length === 0) { log('⚠️ 没有可处理的文件'); return; }
-
         const markItems = doMark && markContent ? parseMarkInput(markContent) : null;
 
         if (files.length === 1) {
           const file = files[0];
           try {
             let processedFile = file;
-
             if (markItems && markItems.length > 0) {
               processedFile = await markFileWithCamouflage(processedFile, markItems);
               log('✅ 已植入标记: ' + markContent);
@@ -1437,7 +1228,6 @@
               markStatus.className = 'mark-status done';
               btnDownloadMarked.disabled = false;
             }
-
             if (doReplaceDemo && customDemoBlob) {
               const ab = await processedFile.arrayBuffer();
               const zip = await JSZip.loadAsync(ab);
@@ -1451,7 +1241,6 @@
               log('✅ 处理完成: ' + file.name);
               return;
             }
-
             if (doConvert && (currentMode === 'bds2bdi' || currentMode === 'bdi2bds')) {
               const outExt = currentMode === 'bds2bdi' ? 'bdi' : 'bds';
               const baseName = file.name.replace(/\.(bds|bdi|zip)$/i, '');
@@ -1468,13 +1257,11 @@
               log('✅ 转换完成: ' + outFileName);
               return;
             }
-
             if (markItems && markItems.length > 0 && !doReplaceDemo && !doConvert) {
               saveAs(processedFile, file.name);
               log('✅ 打标完成: ' + file.name);
               return;
             }
-
             if (doReplaceDemo && customDemoBlob && !markItems && !doConvert) {
               const ab = await file.arrayBuffer();
               const zip = await JSZip.loadAsync(ab);
@@ -1488,7 +1275,6 @@
               log('✅ 替换demo完成: ' + file.name);
               return;
             }
-
             log('⚠️ 未选择任何有效操作');
           } catch (err) {
             log('❌ 处理失败: ' + err.message);
@@ -1498,18 +1284,15 @@
 
         const resultZip = new JSZip();
         let successCount = 0, failCount = 0;
-
         for (let idx = 0; idx < files.length; idx++) {
           const file = files[idx];
           try {
             let processedFile = file;
-
             if (markItems && markItems.length > 0) {
               processedFile = await markFileWithCamouflage(processedFile, markItems);
               savedMarkContent = markContent;
               isMarked = true;
             }
-
             if (doReplaceDemo || doConvert) {
               const ab = await processedFile.arrayBuffer();
               const zip = await JSZip.loadAsync(ab);
@@ -1541,9 +1324,7 @@
             log('❌ [' + (idx + 1) + '/' + files.length + '] ' + file.name + ' 失败: ' + err.message);
           }
         }
-
         if (successCount === 0) { alert('所有文件处理失败'); return; }
-
         try {
           const outBlob = await resultZip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
           const suffix = [];
@@ -1564,7 +1345,6 @@
         }
       }
 
-      // ===== 压缩相关 =====
       async function compressImagesInternal(files) {
         if (!files || files.length === 0) return;
         if (isProcessing) return;
@@ -1572,7 +1352,6 @@
         log('🗜️ 开始压缩图片...');
         const maxSize = getMaxImageSize();
         let newCompressedFiles = [];
-
         for (let idx = 0; idx < files.length; idx++) {
           const file = files[idx];
           try {
@@ -1584,7 +1363,6 @@
             const imageFiles = entries.filter(filename =>
               !zip.files[filename].dir && /\.(png|jpg|jpeg|webp|gif|bmp)$/i.test(filename));
             let processedCount = 0;
-
             for (const filename of entries) {
               if (zip.files[filename].dir) continue;
               if (filename.toLowerCase().endsWith('gscopyright.json')) continue;
@@ -1593,9 +1371,7 @@
               const isDemo = filename.match(/\/?demo\.png$/i) !== null;
               const isOuterSkinDemo = filename.match(/^skin\/demo\.png$/i) !== null;
               if (isDemo && !isOuterSkinDemo) continue;
-
               const fileData = await zip.files[filename].async('arraybuffer');
-
               if (filename.toLowerCase().endsWith('info.txt')) {
                 let text = new TextDecoder().decode(fileData);
                 text = text.replace(/^AtomSkinName\s*=\s*light\s*,\s*dark\s*$/gim, '');
@@ -1603,7 +1379,6 @@
                 newZip.file(filename, new TextEncoder().encode(text));
                 continue;
               }
-
               if (/\.(png|jpg|jpeg|webp|gif|bmp)$/i.test(filename)) {
                 const compressedData = await compressImageData(fileData, filename);
                 newZip.file(filename, compressedData);
@@ -1615,24 +1390,13 @@
             }
             const content = await newZip.generateAsync({ type: 'arraybuffer', compression: 'DEFLATE', compressionOptions: { level: 6 } });
             const compressedBlob = new Blob([content], { type: 'application/zip' });
-            newCompressedFiles.push({
-              name: file.name,
-              blob: compressedBlob,
-              originalSize: file.size,
-              compressedSize: compressedBlob.size
-            });
+            newCompressedFiles.push({ name: file.name, blob: compressedBlob, originalSize: file.size, compressedSize: compressedBlob.size });
             log('✅ ' + file.name + ' 压缩完成');
           } catch (err) {
             log('❌ ' + file.name + ' 压缩失败: ' + err.message);
-            newCompressedFiles.push({
-              name: file.name,
-              blob: file,
-              originalSize: file.size,
-              compressedSize: file.size
-            });
+            newCompressedFiles.push({ name: file.name, blob: file, originalSize: file.size, compressedSize: file.size });
           }
         }
-
         isCompressed = true;
         compressedFiles = newCompressedFiles;
         downloadCompressedBtn.disabled = false;
@@ -1885,11 +1649,6 @@
                 const compressedData = await compressImageData(fileData, filename);
                 newZip.file(filename, compressedData);
                 processedCount++;
-                const originalSize = fileData.byteLength;
-                const compressedSize = compressedData.byteLength;
-                const rate = ((1 - compressedSize / originalSize) * 100).toFixed(1);
-                const status = compressedSize > maxSize ? ' ⚠️超过限制' : ' ✅';
-                log('  ✅ ' + filename + ': ' + formatSize(originalSize) + ' → ' + formatSize(compressedSize) + ' (减少' + rate + '%)' + status);
                 updateProgress(Math.round((processedCount / imageFiles.length) * 100));
               } else {
                 newZip.file(filename, fileData);
@@ -2004,34 +1763,27 @@
         });
       }
 
-      // ===== 处理 ZIP 通用函数 =====
       async function processZipCommon(zip) {
         const outZip = new JSZip();
         let demoPngBlob = customDemoCompressedBlob || customDemoBlob;
         const allFiles = Object.keys(zip.files);
-
         for (const key of allFiles) {
           const entry = zip.files[key];
           if (entry.dir) continue;
           let originPath = key.replace(/^\.\//, '').replace(/^\//, '');
-
           if (originPath.toLowerCase().endsWith('gscopyright.json')) continue;
           const lowerOrigin = originPath.toLowerCase();
           if (lowerOrigin.endsWith('rain.til') || lowerOrigin.endsWith('niarbv.til') || lowerOrigin.endsWith('ysdq.til')) continue;
-
           const lower = originPath.toLowerCase();
           const isDemo = originPath.match(/\/?demo\.png$/i) !== null;
           const isOuterSkinDemo = originPath.match(/^skin\/demo\.png$/i) !== null;
           if (isDemo && !isOuterSkinDemo) continue;
-
           const isInfoTxt = lower.match(/\/?info\.txt$/i) !== null;
           let targetPath = null;
           let inLight = false;
           let inDark = false;
           let relativePath = originPath;
-
           const needConvert = (currentMode === 'bds2bdi' || currentMode === 'bdi2bds');
-
           if (needConvert) {
             if (currentMode === 'bds2bdi') {
               if (originPath.match(/\/?light\//i)) { inLight = true; relativePath = originPath.replace(/^.*?light\//, ''); }
@@ -2039,13 +1791,11 @@
               else if (originPath.match(/\/?skin\/light\//i)) { inLight = true; relativePath = originPath.replace(/^.*?skin\/light\//, ''); }
               else if (originPath.match(/\/?skin\/dark\//i)) { inDark = true; relativePath = originPath.replace(/^.*?skin\/dark\//, ''); }
               else if (originPath.match(/\/?skin\//i) && !originPath.match(/\/?skin\/(light|dark)\//i)) { relativePath = originPath.replace(/^.*?skin\//, ''); }
-
               if (isDemo && isOuterSkinDemo) {
                 if (demoPngBlob) outZip.file('skin/demo.png', demoPngBlob);
                 else { const data = await entry.async('blob'); outZip.file('skin/demo.png', data); }
                 continue;
               }
-
               if (isInfoTxt) {
                 let text = await entry.async('string');
                 text = text.replace(/^AtomSkinName\s*=\s*light\s*,\s*dark\s*$/gim, '');
@@ -2056,7 +1806,6 @@
                 outZip.file(targetPath, text);
                 continue;
               }
-
               if (inLight) {
                 if (relativePath.startsWith('res/')) targetPath = 'skin/light/skin/res/' + relativePath.slice(4);
                 else if (relativePath.startsWith('land/')) targetPath = 'skin/light/skin/land/' + relativePath.slice(5);
@@ -2070,18 +1819,15 @@
               } else {
                 targetPath = originPath.startsWith('skin/') ? originPath : 'skin/' + originPath;
               }
-
               if (!targetPath) continue;
               if (targetPath === 'skin/demo.png' && !demoPngBlob) {
                 const data = await entry.async('blob');
                 outZip.file(targetPath, data);
                 continue;
               }
-
               let data = await entry.async('blob');
               let isCss = targetPath.endsWith('default.css');
               let isTxtFile = targetPath.toLowerCase().endsWith('info.txt');
-
               if (isCss) {
                 let text = await entry.async('string');
                 text = text.replace(/ogg/g, 'aiff');
@@ -2097,13 +1843,11 @@
               else if (originPath.match(/\/?skin\/dark\//i)) { inDark = true; relativePath = originPath.replace(/^.*?skin\/dark\//, ''); }
               else if (originPath.match(/\/?light\//i)) { inLight = true; relativePath = originPath.replace(/^.*?light\//, ''); }
               else if (originPath.match(/\/?dark\//i)) { inDark = true; relativePath = originPath.replace(/^.*?dark\//, ''); }
-
               if (isDemo && !inLight && !inDark) {
                 if (demoPngBlob) outZip.file('demo.png', demoPngBlob);
                 else { const data = await entry.async('blob'); outZip.file('demo.png', data); }
                 continue;
               }
-
               if (isInfoTxt) {
                 let text = await entry.async('string');
                 text = text.replace(/^AtomSkinName\s*=\s*light\s*,\s*dark\s*$/gim, '');
@@ -2114,7 +1858,6 @@
                 outZip.file(targetPath, text);
                 continue;
               }
-
               if (inLight) {
                 if (relativePath.startsWith('res/')) targetPath = 'light/res/' + relativePath.slice(4);
                 else if (relativePath.startsWith('land/')) targetPath = 'light/land/' + relativePath.slice(5);
@@ -2130,18 +1873,15 @@
               } else {
                 targetPath = originPath;
               }
-
               if (!targetPath) continue;
               if (targetPath === 'demo.png' && !demoPngBlob) {
                 const data = await entry.async('blob');
                 outZip.file(targetPath, data);
                 continue;
               }
-
               let data = await entry.async('blob');
               let isCss = targetPath.endsWith('default.css');
               let isTxtFile = targetPath.toLowerCase().endsWith('info.txt');
-
               if (isCss) {
                 let text = await entry.async('string');
                 text = text.replace(/aiff/g, 'ogg');
@@ -2158,7 +1898,6 @@
             outZip.file(originPath, data);
           }
         }
-
         if (demoPngBlob) {
           const hasDemoInOut = Object.keys(outZip.files).some(f => f.match(/\/?demo\.png$/i));
           if (!hasDemoInOut) {
@@ -2183,7 +1922,6 @@
         clearLog();
         log('🚀 开始转换 ' + (currentMode === 'bds2bdi' ? '安卓→iOS' : 'iOS→安卓'));
         const outExt = currentMode === 'bds2bdi' ? 'bdi' : 'bds';
-
         if (filesToProcess.length === 1) {
           const file = filesToProcess[0];
           const baseName = file.name.replace(/\.(bds|bdi|zip)$/i, '');
@@ -2212,10 +1950,8 @@
           }
           return;
         }
-
         const resultZip = new JSZip();
         let successCount = 0, failCount = 0;
-
         for (let idx = 0; idx < filesToProcess.length; idx++) {
           const file = filesToProcess[idx];
           const baseName = file.name.replace(/\.(bds|bdi|zip)$/i, '');
@@ -2240,7 +1976,6 @@
             log('❌ [' + (idx + 1) + '/' + filesToProcess.length + '] ' + file.name + ' 转换失败: ' + err.message);
           }
         }
-
         if (successCount === 0) { alert('所有文件转换失败'); convertBtn.disabled = false; convertBtn.textContent = '⚡ 转换并下载'; return; }
         try {
           const resultBlob = await resultZip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
@@ -2261,7 +1996,6 @@
         if (!customDemoBlob) { alert('请先选择替换图片'); return; }
         clearLog();
         log('🖼️ 开始仅替换demo.png');
-
         if (filesToProcess.length === 1) {
           const file = filesToProcess[0];
           try {
@@ -2285,7 +2019,6 @@
           }
           return;
         }
-
         const resultZip = new JSZip();
         for (let idx = 0; idx < filesToProcess.length; idx++) {
           const file = filesToProcess[idx];
@@ -2312,7 +2045,6 @@
         log('✅ 完成');
       });
 
-      // ===== 音效提取 / 转换 / 替换 =====
       extractAudioBtn.addEventListener('click', async function() {
         const filesToProcess = getFilesToProcess();
         if (!filesToProcess || filesToProcess.length === 0) { alert('请先上传皮肤包'); return; }
@@ -2475,7 +2207,6 @@
         replaceAudioBtn.textContent = '⏳ 替换中...';
         clearLog();
         log('🔊 开始音效替换');
-
         if (filesToProcess.length === 1) {
           const file = filesToProcess[0];
           try {
@@ -2502,7 +2233,6 @@
           }
           return;
         }
-
         const resultZip = new JSZip();
         for (let idx = 0; idx < filesToProcess.length; idx++) {
           const file = filesToProcess[idx];
@@ -2531,7 +2261,6 @@
         replaceAudioBtn.textContent = '🔊 替换音效并下载';
       });
 
-      // ===== 字体打标 =====
       function embedTraceToFontData(data, trace) {
         const markerStr = 'FONT_TRACE_MARK:' + trace;
         const encoder = new TextEncoder();
@@ -2726,7 +2455,6 @@
         fontExtractContent.innerText = output;
       });
 
-      // ===== 模式切换 =====
       document.querySelectorAll('#modeTabs .mode-tab').forEach(tab => {
         tab.addEventListener('click', function() {
           document.querySelectorAll('#modeTabs .mode-tab').forEach(t => t.classList.remove('active'));
@@ -2771,7 +2499,6 @@
         });
       });
 
-      // ===== 文件上传 =====
       function handleFiles(fileList) {
         const files = Array.from(fileList);
         if (files.length === 0) return;
@@ -2804,7 +2531,6 @@
         fileInput.value = '';
       });
 
-      // ===================== 加密/解密 =====================
       const encryptModeTabs = document.getElementById('encryptModeTabs');
       const encryptDropZone = document.getElementById('encryptDropZone');
       const encryptFileInput = document.getElementById('encryptFileInput');
@@ -3260,7 +2986,6 @@
       encryptClearLog();
       renderEncryptFileList();
 
-      // ===== 融彩转换 =====
       const rongcaiDropBox = document.getElementById('rongcaiDropBox');
       const rongcaiFileInput = document.getElementById('rongcaiFileInput');
       const rongcaiProcBtn = document.getElementById('rongcaiProcBtn');
@@ -3499,7 +3224,6 @@
       resetRongcaiUI();
       setRongcaiMode('mode2');
 
-      // ===== 初始化 =====
       clearLog();
       updateFileStatus(null);
       extractResult.classList.remove('show');
