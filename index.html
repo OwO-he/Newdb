@@ -306,6 +306,7 @@
       font-weight: 500; white-space: nowrap; margin-left: 8px; transition: background .15s; }
     .mark-copy-btn:hover { background: #dcfce7; }
     .mark-copy-btn.copied { background: #15803d; color: #fff; border-color: #15803d; }
+    .file-stat { font-size: 0.85rem; padding: 2px 0; color: var(--text-secondary); }
   </style>
 </head>
 <body>
@@ -468,26 +469,27 @@
       </div>
     </div>
 
+    <!-- ===================== 融彩转换（新版） ===================== -->
     <div class="section" id="sectionRongcai">
       <div id="modePanel">
         <strong>请选择加工模式：</strong><br>
-        <button class="mode-btn" id="btnMode1" onclick="setRongcaiMode('mode1')">模式一：彩底转融合底 (固定灰色)</button>
+        <button class="mode-btn active-mode" id="btnMode1" onclick="setMode('mode1')">模式一：彩底转融合底</button>
         <br>
-        <button class="mode-btn active-mode" id="btnMode2" onclick="setRongcaiMode('mode2')">模式二：融合底转彩底 (自适应取色)</button>
-        <div id="modeDescription" style="margin-top:10px; margin-bottom:0; background:var(--bg-subtle); padding:8px 14px; border-radius:10px; border-left:4px solid var(--color-accent); color:var(--text-secondary);">
-          当前模式：<strong>融合底转彩底</strong>。采样左边缘中点颜色，铺满底部并保留羽化。
-        </div>
+        <button class="mode-btn" id="btnMode2" onclick="setMode('mode2')">模式二：融合底转彩底</button>
       </div>
+
       <div class="upload-area" id="rongcaiDropBox">
         <p style="margin-bottom: 6px; font-weight: 450;">📁 拖拽或批量导入 <strong>.bdi / .bds / .zip</strong> 到此处</p>
         <input type="file" id="rongcaiFileInput" accept=".bdi,.bds,.zip,application/zip,application/octet-stream" multiple hidden>
         <button onclick="document.getElementById('rongcaiFileInput').click()" style="background:#2e3b4e; border:none; padding:8px 20px; border-radius:40px; color:#fff; font-weight:500; cursor:pointer;">选择文件 (支持多选)</button>
       </div>
+
       <div class="action-row">
-        <button class="action-btn rongcai" id="rongcaiProcBtn" disabled onclick="startRongcaiProcess()">▶ 开始处理</button>
-        <button class="action-btn secondary" id="rongcaiDlBtn" disabled onclick="triggerRongcaiDownload()">⬇ 下载处理后文件</button>
+        <button class="action-btn rongcai" id="rongcaiProcBtn" disabled onclick="startProcess()">▶ 开始批量处理</button>
+        <button class="action-btn secondary" id="rongcaiDlBtn" disabled onclick="triggerDownload()">⬇ 下载全部结果</button>
         <span class="badge rongcai-badge" id="rongcaiStatusBadge">等待文件</span>
       </div>
+      <div id="rongcaiStatusList" style="font-size:12px; margin-top:10px; max-height:150px; overflow-y:auto;"></div>
       <div class="log-box" id="rongcaiLog">📋 日志区域 · 拖入文件开始</div>
     </div>
 
@@ -620,14 +622,7 @@
       let isMarked = false;
 
       /* =========================================================
-       *  打标核心
-       *  - 只打非 txt、非 png 的文本类文件
-       *  - 每个文件末尾追加一个新分组
-       *  - 段名和原文件里的段名长度相近、字母不重样
-       *  - 键名和原键名长度相近、字母不重样
-       *  - 值模仿原值形态，藏的是原文的 Base36 短码
-       *  - 无任何符号
-       *  - 查标时只读每个文件最后一个段，避免把原文件内容当成标记
+       *  打标核心：伪装组（查标只读最后一段）
        * ========================================================= */
       const B36 = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
@@ -672,19 +667,13 @@
         };
       }
 
-      /* 值：模仿原值形态，把 Base36 短码塞进去 */
       function makeValue(text, refValue, rng) {
         const code = textToCode(text);
-
-        // 数字型：直接写 Base36 短码（含字母也可，解析器不认）
         if (/^\d+$/.test(refValue)) {
-          // 保持是数字或短字母混合，长度接近参考值
           const targetLen = Math.max(2, Math.min(12, refValue.length));
           if (code.length <= targetLen) return code;
           return code.slice(0, targetLen) + code.slice(-2);
         }
-
-        // 坐标型：切成 N 段，每段是 Base36 短码的一部分
         if (/^\d+(,\d+)+$/.test(refValue)) {
           const parts = refValue.split(',');
           const count = parts.length;
@@ -695,61 +684,44 @@
           }
           return chunks.join(',');
         }
-
-        // "数字,字母数字"
         if (/^\d+,[0-9a-zA-Z]+$/.test(refValue)) {
           return `${Math.floor(rng() * 90 + 10)},${code}`;
         }
-
-        // 短值：加一个字母前缀 + code
         if (/^[0-9a-zA-Z]{1,6}$/.test(refValue)) {
           const a = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
           return a[Math.floor(rng() * 26)] + code;
         }
-
         return code;
       }
 
-      /* 从值里还原原文（严格模式，只按我们生成时的几种固定形态） */
       function valueToText(val) {
         val = String(val || '').trim();
         if (!val) return null;
-
-        // 坐标型：每段是 Base36 的一部分，直接拼接还原
         if (/^[0-9A-Z]+(,[0-9A-Z]+)+$/.test(val)) {
           const code = val.split(',').join('');
           const t = codeToText(code);
           if (t && isValidMark(t)) return t;
           return null;
         }
-
-        // "数字,字母数字"
         const m1 = val.match(/^\d{1,3},([0-9A-Z]+)$/);
         if (m1) {
           const t = codeToText(m1[1]);
           if (t && isValidMark(t)) return t;
         }
-
-        // 字母前缀 + Base36
         if (/^[A-Z][0-9A-Z]+$/.test(val)) {
           const t = codeToText(val.slice(1));
           if (t && isValidMark(t)) return t;
         }
-
-        // 纯 Base36
         if (/^[0-9A-Z]+$/.test(val)) {
           const t = codeToText(val);
           if (t && isValidMark(t)) return t;
         }
-
         return null;
       }
 
-      /* 生成与原段名长度相近、字母完全不重样的新段名 */
       function newSectionName(origSection, existingNames, rng) {
         const m = origSection.match(/^([A-Za-z]+)/);
         const refLen = m ? Math.min(5, Math.max(2, m[1].length)) : 3;
-
         const usedLetters = new Set();
         for (const s of existingNames) {
           for (const ch of s) if (/[A-Za-z]/.test(ch)) usedLetters.add(ch.toUpperCase());
@@ -762,7 +734,6 @@
         if (available.length < refLen + 2) {
           for (let i = 0; i < 26; i++) available.push(String.fromCharCode(65 + i));
         }
-
         for (let attempt = 0; attempt < 200; attempt++) {
           const len = refLen + (rng() < 0.4 ? 1 : 0) - (rng() < 0.2 ? 1 : 0);
           const finalLen = Math.max(2, Math.min(5, len));
@@ -770,7 +741,6 @@
           for (let i = 0; i < finalLen; i++) {
             name += available[Math.floor(rng() * available.length)];
           }
-          // 加一个短数字后缀
           if (rng() < 0.7) name += Math.floor(rng() * 900 + 100);
           if (existingNames.includes(name)) continue;
           return name;
@@ -778,12 +748,10 @@
         return 'XZ' + Math.floor(rng() * 9000 + 1000);
       }
 
-      /* 生成与原键名长度相近、字母不重样的新键名 */
       function disguiseKey(orig, usedKeys, rng) {
         const refLen = Math.max(2, Math.min(10, orig.length));
         const usedLetters = new Set();
         for (const ch of orig) if (/[A-Za-z]/.test(ch)) usedLetters.add(ch.toUpperCase());
-
         const available = [];
         for (let i = 0; i < 26; i++) {
           const ch = String.fromCharCode(65 + i);
@@ -792,7 +760,6 @@
         if (available.length < 2) {
           for (let i = 0; i < 26; i++) available.push(String.fromCharCode(65 + i));
         }
-
         for (let attempt = 0; attempt < 200; attempt++) {
           let len = refLen + (rng() < 0.3 ? 1 : 0) - (rng() < 0.3 ? 1 : 0);
           len = Math.max(2, Math.min(12, len));
@@ -810,7 +777,6 @@
         return 'ZK' + n;
       }
 
-      /* 分析最后一组的形态（供 makeValue 参考） */
       function analyzeLastStyle(text) {
         const sections = [...text.matchAll(/^\[([A-Za-z0-9_]+)\]\s*$/gm)];
         if (sections.length === 0) return null;
@@ -829,13 +795,11 @@
         return { sectionName: lastSec[1], kv, allSections: sections.map(s => s[1]) };
       }
 
-      /* 生成伪装组 */
       function buildCamouflage(styleInfo, items, rng) {
         const existingSections = styleInfo ? styleInfo.allSections : [];
         const newSec = styleInfo
           ? newSectionName(styleInfo.sectionName, existingSections, rng)
           : 'SK' + Math.floor(rng() * 900 + 100);
-
         const usedKeys = new Set();
         const lines = [`[${newSec}]`];
         for (let i = 0; i < items.length; i++) {
@@ -905,7 +869,6 @@
           let text;
           try { text = new TextDecoder('utf-8', { fatal: true }).decode(buf); }
           catch { continue; }
-
           const styleInfo = analyzeLastStyle(text);
           let seed = (Date.now() ^ Math.floor(Math.random() * 0xffffffff)) >>> 0;
           for (let i = 0; i < name.length; i++) seed = (seed * 31 + name.charCodeAt(i)) >>> 0;
@@ -917,7 +880,6 @@
         return zip;
       }
 
-      /* 查标：只读每个文件最后一个段下的键值对 */
       async function scanMarkFromZip(zip) {
         const names = Object.keys(zip.files).filter(n => !zip.files[n].dir);
         const found = new Set();
@@ -929,13 +891,10 @@
           try { text = new TextDecoder('utf-8', { fatal: true }).decode(buf); }
           catch { continue; }
 
-          // 找文件中最后一个 [XXX] 段
           const sections = [...text.matchAll(/^\[([A-Za-z0-9_]+)\]\s*$/gm)];
           if (sections.length === 0) continue;
           const last = sections[sections.length - 1];
           const tail = text.slice(last.index + last[0].length);
-
-          // 只读最后一段下的键值对
           for (const line of tail.split(/\r?\n/)) {
             if (/^\s*\[/.test(line)) break;
             const m = line.match(/^([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.+)$/);
@@ -2531,6 +2490,7 @@
         fileInput.value = '';
       });
 
+      // ===================== 加密/解密 =====================
       const encryptModeTabs = document.getElementById('encryptModeTabs');
       const encryptDropZone = document.getElementById('encryptDropZone');
       const encryptFileInput = document.getElementById('encryptFileInput');
@@ -2986,244 +2946,269 @@
       encryptClearLog();
       renderEncryptFileList();
 
-      const rongcaiDropBox = document.getElementById('rongcaiDropBox');
-      const rongcaiFileInput = document.getElementById('rongcaiFileInput');
-      const rongcaiProcBtn = document.getElementById('rongcaiProcBtn');
-      const rongcaiDlBtn = document.getElementById('rongcaiDlBtn');
-      const rongcaiLog = document.getElementById('rongcaiLog');
-      const rongcaiStatusBadge = document.getElementById('rongcaiStatusBadge');
-      const modeDescription = document.getElementById('modeDescription');
+      // ===================== 融彩转换（新版，默认模式一） =====================
+      (function() {
+        const rongcaiDropBox = document.getElementById('rongcaiDropBox');
+        const rongcaiFileInput = document.getElementById('rongcaiFileInput');
+        const rongcaiProcBtn = document.getElementById('rongcaiProcBtn');
+        const rongcaiDlBtn = document.getElementById('rongcaiDlBtn');
+        const rongcaiLog = document.getElementById('rongcaiLog');
+        const rongcaiStatusBadge = document.getElementById('rongcaiStatusBadge');
+        const rongcaiStatusList = document.getElementById('rongcaiStatusList');
+        const btnMode1 = document.getElementById('btnMode1');
+        const btnMode2 = document.getElementById('btnMode2');
 
-      let rongcaiSourceFiles = [];
-      let rongcaiOutputBlobs = [];
-      let rongcaiCurrentMode = 'mode2';
+        let rongcaiSourceFiles = [];
+        let rongcaiSourceZips = [];
+        let rongcaiOutputZips = [];
+        let rongcaiOutputNames = [];
+        let rongcaiCurrentMode = 'mode1';
 
-      function rongcaiLogMsg(str) {
-        rongcaiLog.innerText += str + "\n";
-        rongcaiLog.scrollTop = rongcaiLog.scrollHeight;
-      }
-      function setRongcaiStatus(text, isReady = false) {
-        rongcaiStatusBadge.innerText = text;
-        rongcaiStatusBadge.style.background = isReady ? '#b3e0b3' : '#d0d9e8';
-      }
-      function resetRongcaiUI() {
-        rongcaiOutputBlobs = [];
-        rongcaiDlBtn.disabled = true;
-        rongcaiProcBtn.disabled = true;
-        setRongcaiStatus('等待文件');
-      }
-      window.setRongcaiMode = function(mode) {
-        rongcaiCurrentMode = mode;
-        const btn1 = document.getElementById('btnMode1');
-        const btn2 = document.getElementById('btnMode2');
-        if (mode === 'mode1') {
-          btn1.classList.add('active-mode');
-          btn2.classList.remove('active-mode');
-          modeDescription.innerHTML = '当前模式：<strong>彩底转融合底</strong>。底部铺色范围将缩小三分之一，更显收敛。';
-        } else {
-          btn2.classList.add('active-mode');
-          btn1.classList.remove('active-mode');
-          modeDescription.innerHTML = '当前模式：<strong>融合底转彩底</strong>。采样左边缘中点颜色，去除原灰色底。';
+        function rongcaiLogMsg(str) {
+          rongcaiLog.innerText += str + "\n";
+          rongcaiLog.scrollTop = rongcaiLog.scrollHeight;
         }
-      };
+        function rongcaiSetStatus(text, isReady = false) {
+          rongcaiStatusBadge.innerText = text;
+          rongcaiStatusBadge.style.background = isReady ? '#b3e0b3' : '#d0d9e8';
+        }
+        function rongcaiResetUI() {
+          rongcaiOutputZips = [];
+          rongcaiOutputNames = [];
+          rongcaiDlBtn.disabled = true;
+          rongcaiProcBtn.disabled = true;
+          rongcaiSetStatus('等待文件');
+          rongcaiStatusList.innerHTML = '';
+        }
 
-      rongcaiDropBox.addEventListener('dragover', (e) => { e.preventDefault(); rongcaiDropBox.classList.add('active'); });
-      rongcaiDropBox.addEventListener('dragleave', () => rongcaiDropBox.classList.remove('active'));
-      rongcaiDropBox.addEventListener('drop', async (e) => {
-        e.preventDefault();
-        rongcaiDropBox.classList.remove('active');
-        const files = e.dataTransfer.files;
-        if (files.length > 0) await loadRongcaiFiles(files);
-      });
-      rongcaiFileInput.onchange = async () => {
-        const files = rongcaiFileInput.files;
-        if (files.length > 0) await loadRongcaiFiles(files);
-        rongcaiFileInput.value = '';
-      };
-
-      async function loadRongcaiFiles(files) {
-        rongcaiLog.innerText = '';
-        rongcaiSourceFiles = [];
-        resetRongcaiUI();
-        for (const file of files) {
-          const name = file.name.toLowerCase();
-          if (!name.endsWith('.bdi') && !name.endsWith('.bds') && !name.endsWith('.zip')) {
-            rongcaiLogMsg(`❌ 不支持的文件格式：${file.name}`);
-            continue;
+        window.setMode = function(mode) {
+          rongcaiCurrentMode = mode;
+          if(mode === 'mode1') {
+            btnMode1.classList.add('active-mode');
+            btnMode2.classList.remove('active-mode');
+          } else {
+            btnMode2.classList.add('active-mode');
+            btnMode1.classList.remove('active-mode');
           }
-          rongcaiSourceFiles.push(file);
-        }
-        if (rongcaiSourceFiles.length === 0) { setRongcaiStatus('格式不支持'); return; }
-        rongcaiLogMsg(`📂 读取 ${rongcaiSourceFiles.length} 个文件`);
-        let allValid = true;
-        for (const file of rongcaiSourceFiles) {
-          try {
-            const buf = await file.arrayBuffer();
-            await JSZip.loadAsync(buf);
-            rongcaiLogMsg(`✅ ${file.name} 解析成功`);
-          } catch (err) {
-            rongcaiLogMsg(`❌ ${file.name} 解析失败：${err.message}`);
-            allValid = false;
-          }
-        }
-        if (allValid) {
-          rongcaiProcBtn.disabled = false;
-          setRongcaiStatus(`已加载 ${rongcaiSourceFiles.length} 个文件`, true);
-        } else {
-          setRongcaiStatus('部分文件解析失败');
-        }
-      }
+        };
 
-      async function processRongcaiImagePng(pngBlob, fillColorHex) {
-        return new Promise((resolve, reject) => {
-          const img = new Image();
-          const url = URL.createObjectURL(pngBlob);
-          img.onload = () => {
-            const w = img.naturalWidth;
-            const h = img.naturalHeight;
-            const canvas = document.createElement('canvas');
-            canvas.width = w; canvas.height = h;
-            const ctx = canvas.getContext('2d', { willReadFrequently: true });
-            ctx.drawImage(img, 0, 0);
-            URL.revokeObjectURL(url);
-            let bottomSixthY, fusionHeight, solidHeight, solidStartY;
-            if (rongcaiCurrentMode === 'mode1') {
-              fusionHeight = h / 9;
-              bottomSixthY = h - fusionHeight;
-              solidHeight = fusionHeight * 0.5;
-              solidStartY = h - solidHeight;
-              const hex = fillColorHex.replace('#', '');
-              const r = parseInt(hex.substring(0, 2), 16);
-              const g = parseInt(hex.substring(2, 4), 16);
-              const b = parseInt(hex.substring(4, 6), 16);
-              ctx.fillStyle = fillColorHex;
-              ctx.fillRect(0, solidStartY, w, solidHeight);
-              const grad = ctx.createLinearGradient(0, solidStartY, 0, bottomSixthY);
-              grad.addColorStop(0, `rgba(${r},${g},${b},1)`);
-              grad.addColorStop(1, `rgba(${r},${g},${b},0)`);
-              ctx.fillStyle = grad;
-              ctx.fillRect(0, bottomSixthY, w, solidStartY - bottomSixthY);
-            } else {
-              fusionHeight = h / 6;
-              bottomSixthY = h - fusionHeight;
-              solidHeight = fusionHeight * 0.5;
-              solidStartY = h - solidHeight;
-              const pixelData = ctx.getImageData(0, Math.floor(h / 2), 1, 1).data;
-              const r = pixelData[0];
-              const g = pixelData[1];
-              const b = pixelData[2];
-              rongcaiLogMsg(`   🎨 ${fillColorHex === 'light' ? '日间' : '夜间'} 采样颜色: rgba(${r}, ${g}, ${b})`);
-              ctx.fillStyle = `rgb(${r},${g},${b})`;
-              ctx.fillRect(0, solidStartY, w, solidHeight);
-              const grad = ctx.createLinearGradient(0, bottomSixthY, 0, solidStartY);
-              grad.addColorStop(0, `rgba(${r},${g},${b}, 0.75)`);
-              grad.addColorStop(1, `rgba(${r},${g},${b}, 1)`);
-              ctx.fillStyle = grad;
-              ctx.fillRect(0, bottomSixthY, w, fusionHeight - solidHeight);
-            }
-            canvas.toBlob(blob => { resolve(blob); }, 'image/png');
-          };
-          img.onerror = (e) => reject(e);
-          img.src = url;
+        // 默认模式一（彩底转融合底）
+        btnMode1.classList.add('active-mode');
+        btnMode2.classList.remove('active-mode');
+
+        rongcaiDropBox.addEventListener('dragover', (e) => { e.preventDefault(); rongcaiDropBox.classList.add('active'); });
+        rongcaiDropBox.addEventListener('dragleave', () => rongcaiDropBox.classList.remove('active'));
+        rongcaiDropBox.addEventListener('drop', async (e) => {
+          e.preventDefault();
+          rongcaiDropBox.classList.remove('active');
+          const files = Array.from(e.dataTransfer.files);
+          if (files.length > 0) await rongcaiLoadFiles(files);
         });
-      }
 
-      async function startRongcaiProcess() {
-        if (rongcaiSourceFiles.length === 0) { rongcaiLogMsg('⚠️ 请先加载有效文件'); return; }
-        rongcaiProcBtn.disabled = true;
-        rongcaiDlBtn.disabled = true;
-        rongcaiLogMsg(`\n===== 🚀 开始批量处理 =====`);
-        setRongcaiStatus('处理中...');
-        try {
-          rongcaiOutputBlobs = [];
-          for (let i = 0; i < rongcaiSourceFiles.length; i++) {
-            const file = rongcaiSourceFiles[i];
-            rongcaiLogMsg(`\n[${i + 1}/${rongcaiSourceFiles.length}] 处理: ${file.name}`);
-            const zip = await JSZip.loadAsync(await file.arrayBuffer());
-            const fileName = file.name;
+        rongcaiFileInput.onchange = async () => {
+          const files = Array.from(rongcaiFileInput.files);
+          if (files.length > 0) await rongcaiLoadFiles(files);
+          rongcaiFileInput.value = '';
+        };
+
+        async function rongcaiLoadFiles(files) {
+          rongcaiLog.innerText = '';
+          rongcaiSourceFiles = files;
+          rongcaiResetUI();
+          rongcaiLogMsg(`📂 接收批量文件：${files.length} 个`);
+          rongcaiSourceZips = [];
+          for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const name = file.name.toLowerCase();
+            if (!name.endsWith('.bdi') && !name.endsWith('.bds') && !name.endsWith('.zip')) {
+              rongcaiLogMsg(`❌ 跳过不支持文件：${file.name}`);
+              continue;
+            }
+            try {
+              const buf = await file.arrayBuffer();
+              const zip = await JSZip.loadAsync(buf);
+              rongcaiSourceZips.push(zip);
+              rongcaiLogMsg(`✅ 解析成功：${file.name}`);
+            } catch (err) {
+              rongcaiLogMsg(`❌ 解析失败：${file.name} (${err.message})`);
+            }
+          }
+          if (rongcaiSourceZips.length > 0) {
+            rongcaiProcBtn.disabled = false;
+            rongcaiSetStatus(`已加载 ${rongcaiSourceZips.length} 个，可处理`, true);
+          }
+        }
+
+        async function rongcaiProcessImagePng(pngBlob, fillColorHex) {
+          return new Promise((resolve, reject) => {
+            const img = new Image();
+            const url = URL.createObjectURL(pngBlob);
+            img.onload = () => {
+              const w = img.naturalWidth;
+              const h = img.naturalHeight;
+              const canvas = document.createElement('canvas');
+              canvas.width = w; canvas.height = h;
+              const ctx = canvas.getContext('2d', { willReadFrequently: true });
+              ctx.drawImage(img, 0, 0);
+              URL.revokeObjectURL(url);
+              if (rongcaiCurrentMode === 'mode1') {
+                const bottomSixthY = h - (h / 6);
+                const fusionHeight = h / 6;
+                const solidHeight = fusionHeight * 0.5;
+                const solidStartY = h - solidHeight;
+                const hex = fillColorHex.replace('#', '');
+                const r = parseInt(hex.substring(0, 2), 16);
+                const g = parseInt(hex.substring(2, 4), 16);
+                const b = parseInt(hex.substring(4, 6), 16);
+                ctx.fillStyle = fillColorHex;
+                ctx.fillRect(0, solidStartY, w, solidHeight);
+                const grad = ctx.createLinearGradient(0, solidStartY, 0, bottomSixthY);
+                grad.addColorStop(0, `rgba(${r},${g},${b},1)`);
+                grad.addColorStop(1, `rgba(${r},${g},${b},0)`);
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, bottomSixthY, w, solidStartY - bottomSixthY);
+              } else {
+                const bottomSixthY = h - (h / 6);
+                const fusionHeight = h / 6;
+                const solidHeight = fusionHeight * 0.5;
+                const solidStartY = h - solidHeight;
+                const pixelData = ctx.getImageData(0, Math.floor(h / 2), 1, 1).data;
+                const r = pixelData[0];
+                const g = pixelData[1];
+                const b = pixelData[2];
+                ctx.fillStyle = `rgb(${r},${g},${b})`;
+                ctx.fillRect(0, solidStartY, w, solidHeight);
+                const grad = ctx.createLinearGradient(0, bottomSixthY, 0, solidStartY);
+                grad.addColorStop(0, `rgba(${r},${g},${b}, 0.75)`);
+                grad.addColorStop(1, `rgba(${r},${g},${b}, 1)`);
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, bottomSixthY, w, fusionHeight - solidHeight);
+              }
+              canvas.toBlob(blob => { resolve(blob); }, 'image/png');
+            };
+            img.onerror = (e) => reject(e);
+            img.src = url;
+          });
+        }
+
+        window.startProcess = async function() {
+          if (rongcaiSourceZips.length === 0) {
+            rongcaiLogMsg('⚠️ 请先加载有效文件');
+            return;
+          }
+          rongcaiProcBtn.disabled = true;
+          rongcaiDlBtn.disabled = true;
+          rongcaiLogMsg(`\n===== 🚀 开始批量处理 (模式: ${rongcaiCurrentMode === 'mode1' ? '彩底转融合底' : '融合底转彩底'}) =====`);
+          rongcaiSetStatus(`正在处理 0/${rongcaiSourceZips.length}...`);
+          rongcaiStatusList.innerHTML = '';
+          rongcaiOutputZips = [];
+          rongcaiOutputNames = [];
+
+          for (let i = 0; i < rongcaiSourceZips.length; i++) {
+            const zip = rongcaiSourceZips[i];
+            const fileName = rongcaiSourceFiles[i] ? rongcaiSourceFiles[i].name : `unknown_${i}.zip`;
             const ext = fileName.split('.').pop().toLowerCase();
-            let lightPath, darkPath;
-            if (ext === 'bdi') {
-              lightPath = "skin/light/skin/res/abj.png";
-              darkPath = "skin/dark/skin/res/abj.png";
-            } else if (ext === 'bds') {
-              const bareName = fileName.slice(0, -4);
-              lightPath = `${bareName}/light/res/abj.png`;
-              darkPath = `${bareName}/dark/res/abj.png`;
-            } else if (ext === 'zip') {
-              if (zip.file("skin/light/skin/res/abj.png")) {
+            try {
+              let lightPath, darkPath;
+              if (ext === 'bdi') {
                 lightPath = "skin/light/skin/res/abj.png";
                 darkPath = "skin/dark/skin/res/abj.png";
-              } else {
+              } else if (ext === 'bds') {
                 const bareName = fileName.slice(0, -4);
                 lightPath = `${bareName}/light/res/abj.png`;
                 darkPath = `${bareName}/dark/res/abj.png`;
+              } else {
+                if (zip.file("skin/light/skin/res/abj.png")) {
+                  lightPath = "skin/light/skin/res/abj.png";
+                  darkPath = "skin/dark/skin/res/abj.png";
+                } else {
+                  const bareName = fileName.slice(0, -4);
+                  lightPath = `${bareName}/light/res/abj.png`;
+                  darkPath = `${bareName}/dark/res/abj.png`;
+                }
               }
-            }
-            if (zip.file(lightPath)) {
-              rongcaiLogMsg(`☀️ 日间图：${lightPath}`);
-              const lightBlob = await zip.file(lightPath).async("blob");
-              const processedLight = await processRongcaiImagePng(lightBlob, 'light');
-              zip.file(lightPath, processedLight);
-            } else {
-              rongcaiLogMsg(`⚠️ 未找到日间图片：${lightPath}`);
-            }
-            if (zip.file(darkPath)) {
-              rongcaiLogMsg(`🌙 夜间图：${darkPath}`);
-              const darkBlob = await zip.file(darkPath).async("blob");
-              const processedDark = await processRongcaiImagePng(darkBlob, 'dark');
-              zip.file(darkPath, processedDark);
-            } else {
-              rongcaiLogMsg(`⚠️ 未找到夜间图片：${darkPath}`);
-            }
-            const suffix = rongcaiCurrentMode === 'mode1' ? '融合底' : '彩底';
-            const baseName = fileName.slice(0, fileName.lastIndexOf('.'));
-            const outputName = `${baseName}-${suffix}.${ext}`;
-            const zipBuf = await zip.generateAsync({ type: "arraybuffer", compression: "DEFLATE" });
-            let outBlob = new Blob([zipBuf], { type: 'application/zip' });
-            if (savedMarkContent) {
-              const items = parseMarkInput(savedMarkContent);
-              if (items.length > 0) {
-                const tempFile = new File([outBlob], outputName);
-                outBlob = await markFileWithCamouflage(tempFile, items);
-                rongcaiLogMsg(`🔒 强制保留标记: ${savedMarkContent}`);
+              if (zip.file(lightPath)) {
+                const lightBlob = await zip.file(lightPath).async("blob");
+                const processedLight = await rongcaiProcessImagePng(lightBlob, "#D2D5DB");
+                zip.file(lightPath, processedLight);
               }
+              if (zip.file(darkPath)) {
+                const darkBlob = await zip.file(darkPath).async("blob");
+                const processedDark = await rongcaiProcessImagePng(darkBlob, "#2E2E2E");
+                zip.file(darkPath, processedDark);
+              }
+              const suffix = rongcaiCurrentMode === 'mode1' ? '融合底' : '彩底';
+              const baseName = fileName.slice(0, fileName.lastIndexOf('.'));
+              const outputName = `${baseName}-${suffix}.${ext}`;
+              const zipBuf = await zip.generateAsync({ type: "arraybuffer", compression: "DEFLATE" });
+              rongcaiOutputZips.push(new Blob([zipBuf], { type: 'application/zip' }));
+              rongcaiOutputNames.push(outputName);
+              const div = document.createElement('div');
+              div.className = 'file-stat';
+              div.innerText = `✅ ${fileName} -> ${outputName}`;
+              rongcaiStatusList.appendChild(div);
+              rongcaiLogMsg(`✅ 完成：${fileName} -> ${outputName} (${i+1}/${rongcaiSourceZips.length})`);
+              rongcaiSetStatus(`正在处理 ${i+1}/${rongcaiSourceZips.length}...`);
+            } catch (err) {
+              const div = document.createElement('div');
+              div.className = 'file-stat';
+              div.style.color = 'red';
+              div.innerText = `❌ 处理失败(已跳过)：${fileName}`;
+              rongcaiStatusList.appendChild(div);
+              rongcaiLogMsg(`❌ 处理失败(已跳过)：${fileName} (${err.message})`);
             }
-            rongcaiOutputBlobs.push({ blob: outBlob, name: outputName });
-            rongcaiLogMsg(`✅ ${outputName} 处理完成`);
           }
-          rongcaiDlBtn.disabled = false;
-          rongcaiLogMsg('\n📦 全部处理完成，可下载');
-          setRongcaiStatus(`处理完成 ${rongcaiOutputBlobs.length} 个文件 ✅`, true);
-        } catch (err) {
-          rongcaiLogMsg(`❌ 处理异常：${err.message}`);
-          setRongcaiStatus('处理出错');
-        } finally {
+          if (rongcaiOutputZips.length > 0) {
+            rongcaiDlBtn.disabled = false;
+            rongcaiLogMsg('📦 全部打包完成，可下载');
+            rongcaiSetStatus(`处理完成：成功 ${rongcaiOutputZips.length} 个 ✅`, true);
+          } else {
+            rongcaiLogMsg('❌ 没有成功处理任何文件');
+            rongcaiSetStatus('处理出错');
+          }
           rongcaiProcBtn.disabled = false;
-        }
-      }
+        };
 
-      function triggerRongcaiDownload() {
-        if (rongcaiOutputBlobs.length === 0) { rongcaiLogMsg('⚠️ 没有可下载的内容'); return; }
-        for (let i = 0; i < rongcaiOutputBlobs.length; i++) {
-          const item = rongcaiOutputBlobs[i];
-          const a = document.createElement('a');
-          a.href = URL.createObjectURL(item.blob);
-          a.download = item.name;
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
-          setTimeout(() => URL.revokeObjectURL(a.href), 4000);
-        }
-        rongcaiLogMsg(`⬇️ 已触发下载 ${rongcaiOutputBlobs.length} 个文件`);
-      }
+        window.triggerDownload = function() {
+          if (rongcaiOutputZips.length === 0) {
+            rongcaiLogMsg('⚠️ 没有可下载的内容');
+            return;
+          }
+          if (rongcaiOutputZips.length === 1) {
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(rongcaiOutputZips[0]);
+            a.download = rongcaiOutputNames[0];
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+            rongcaiLogMsg(`⬇️ 已直接下载: ${rongcaiOutputNames[0]}`);
+          } else if (rongcaiOutputZips.length > 1) {
+            const zip = new JSZip();
+            for (let i = 0; i < rongcaiOutputZips.length; i++) {
+              zip.file(rongcaiOutputNames[i], rongcaiOutputZips[i]);
+            }
+            zip.generateAsync({ type: "blob" }).then(function(content) {
+              const a = document.createElement('a');
+              a.href = URL.createObjectURL(content);
+              a.download = '融彩转换结果.zip';
+              document.body.appendChild(a);
+              a.click();
+              a.remove();
+              setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+              rongcaiLogMsg('⬇️ 已打包下载全部结果');
+            });
+          }
+        };
 
-      window.startRongcaiProcess = startRongcaiProcess;
-      window.triggerRongcaiDownload = triggerRongcaiDownload;
+        rongcaiLog.addEventListener('click', () => {
+          navigator.clipboard?.writeText(rongcaiLog.innerText).catch(() => {});
+        });
 
-      resetRongcaiUI();
-      setRongcaiMode('mode2');
+        rongcaiResetUI();
+      })();
 
+      // ===== 初始化 =====
       clearLog();
       updateFileStatus(null);
       extractResult.classList.remove('show');
