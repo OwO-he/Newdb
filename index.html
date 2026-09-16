@@ -450,6 +450,11 @@
         <span class="direction-badge" id="directionBadge">→ iOS</span>
       </div>
 
+      <!-- ===== 新增：继续编辑按钮（共享文件池） ===== -->
+      <div class="action-row" style="margin-top: 4px;">
+        <button class="action-btn secondary" id="continueEditBtn" style="background: #e8f0fe; color: #1a4c8c; border: 1px solid #a8c7fa;" disabled>🔄 继续编辑（将当前结果导入所有工具）</button>
+      </div>
+
       <div id="audioReplaceArea" class="audio-replace-area" style="display:none;">
         <div class="upload-icon">🎵</div>
         <div class="upload-text">点击或拖拽上传音效包 (含 .aiff / .ogg)</div>
@@ -594,6 +599,12 @@
         <div class="upload-hint">支持 .zip .bds .bdi 批量上传</div>
         <input type="file" id="encryptFileInput" accept=".zip,.bds,.bdi,application/zip,application/octet-stream,application/x-zip-compressed" multiple>
       </div>
+
+      <!-- ===== 新增：加密区也可以从共享池导入文件 ===== -->
+      <div class="action-row" style="margin-bottom: 8px;">
+        <button class="action-btn secondary" id="encryptContinueBtn" style="background: #e8f0fe; color: #1a4c8c; border: 1px solid #a8c7fa; flex: 0 1 auto;" disabled>📥 从“继续编辑”池导入文件</button>
+      </div>
+
       <div class="file-list" id="encryptFileList"></div>
       <div class="encrypt-file-actions">
         <button class="action-btn encrypt-btn" id="encryptActionBtn" disabled>🔐 批量加密</button>
@@ -623,6 +634,11 @@
         <p style="margin-bottom: 6px; font-weight: 450;">📁 拖拽或批量导入 <strong>.bdi / .bds / .zip</strong> 到此处</p>
         <input type="file" id="rongcaiFileInput" accept=".bdi,.bds,.zip,application/zip,application/octet-stream" multiple hidden>
         <button onclick="document.getElementById('rongcaiFileInput').click()" style="background:#2e3b4e; border:none; padding:8px 20px; border-radius:40px; color:#fff; font-weight:500; cursor:pointer;">选择文件 (支持多选)</button>
+      </div>
+
+      <!-- ===== 新增：融彩区也可以从共享池导入文件 ===== -->
+      <div class="action-row" style="margin-bottom: 8px;">
+        <button class="action-btn secondary" id="rongcaiContinueBtn" style="background: #e8f0fe; color: #1a4c8c; border: 1px solid #a8c7fa; flex: 0 1 auto;" disabled>📥 从“继续编辑”池导入文件</button>
       </div>
 
       <div class="action-row">
@@ -720,6 +736,11 @@
       const optCompress = document.getElementById('optCompress');
       const executeSelectedBtn = document.getElementById('executeSelectedBtn');
 
+      // ===== 新增 DOM：继续编辑按钮 =====
+      const continueEditBtn = document.getElementById('continueEditBtn');
+      const encryptContinueBtn = document.getElementById('encryptContinueBtn');
+      const rongcaiContinueBtn = document.getElementById('rongcaiContinueBtn');
+
       const audioReplaceArea = document.getElementById('audioReplaceArea');
       const audioReplaceInput = document.getElementById('audioReplaceInput');
       const audioReplaceStatus = document.getElementById('audioReplaceStatus');
@@ -794,6 +815,106 @@
       let currentSearchMatches = [];
       let currentSearchIndex = -1;
 
+      // =============================================================
+      // ===== 新增：全局共享文件池（“继续编辑”机制） =====
+      // =============================================================
+      let sharedFiles = []; // [{ name, file(File), source }]
+
+      function setSharedFiles(files, source) {
+        sharedFiles = files.map(f => ({
+          name: f.name || '未命名',
+          file: f instanceof File ? f : new File([f], f.name || '未命名'),
+          source: source || '未知'
+        }));
+        refreshContinueButtons();
+        // 自动同步到皮肤工具（如果当前没有文件，或者用户主动点继续编辑）
+        // 这里为了不覆盖用户正在编辑的，不自动，只刷新按钮状态
+      }
+
+      function refreshContinueButtons() {
+        const has = sharedFiles.length > 0;
+        if (continueEditBtn) {
+          continueEditBtn.disabled = !has;
+          continueEditBtn.textContent = has
+            ? `🔄 继续编辑（已暂存 ${sharedFiles.length} 个文件，点击导入所有工具）`
+            : '🔄 继续编辑（暂无暂存文件）';
+        }
+        if (encryptContinueBtn) encryptContinueBtn.disabled = !has;
+        if (rongcaiContinueBtn) rongcaiContinueBtn.disabled = !has;
+      }
+
+      // 将共享池里的文件应用到“皮肤工具”
+      function applySharedToSkin() {
+        if (sharedFiles.length === 0) { alert('暂存池为空，请先处理文件并点击“继续编辑”'); return; }
+        const files = sharedFiles.map(s => s.file);
+        selectedFiles = files;
+        compressedFiles = [];
+        isCompressed = false;
+        // 重置编辑状态
+        editorCurrentZip = null;
+        editorCurrentFilePath = '';
+        editorPendingChanges = {};
+        editorHasLoadedFile = false;
+        updateFileStatus(files);
+        clearLog();
+        log('🔄 已从共享池导入 ' + files.length + ' 个文件（来源：' + sharedFiles[0].source + ' 等）');
+        markStatus.textContent = '📁 ' + files.length + ' 个文件';
+        markStatus.className = 'mark-status';
+        log('🔒 标记系统已就绪');
+      }
+
+      // 将共享池应用到加密区
+      function applySharedToEncrypt() {
+        if (sharedFiles.length === 0) { alert('暂存池为空，请先处理文件并点击“继续编辑”'); return; }
+        const files = sharedFiles.map(s => s.file);
+        addEncryptFiles(files);
+        encryptLog('📥 已从共享池导入 ' + files.length + ' 个文件');
+      }
+
+      // 将共享池应用到融彩区
+      function applySharedToRongcai() {
+        if (sharedFiles.length === 0) { alert('暂存池为空，请先处理文件并点击“继续编辑”'); return; }
+        const files = sharedFiles.map(s => s.file);
+        if (typeof window.__rongcaiLoadFiles === 'function') {
+          window.__rongcaiLoadFiles(files);
+        } else {
+          // fallback: 直接填充 input 并触发
+          const dt = new DataTransfer();
+          files.forEach(f => dt.items.add(f));
+          const inp = document.getElementById('rongcaiFileInput');
+          inp.files = dt.files;
+          inp.dispatchEvent(new Event('change'));
+        }
+      }
+
+      // 绑定按钮
+      if (continueEditBtn) {
+        continueEditBtn.addEventListener('click', () => {
+          applySharedToSkin();
+        });
+      }
+      if (encryptContinueBtn) {
+        encryptContinueBtn.addEventListener('click', () => {
+          applySharedToEncrypt();
+        });
+      }
+      if (rongcaiContinueBtn) {
+        rongcaiContinueBtn.addEventListener('click', () => {
+          applySharedToRongcai();
+        });
+      }
+
+      // 初始化按钮状态
+      refreshContinueButtons();
+
+      // 核心：一个通用的“把结果放入共享池”的函数
+      function pushToShared(files, source) {
+        if (!files || files.length === 0) return;
+        setSharedFiles(files, source);
+        // 同时在 log 里提示
+        log('📥 已将 ' + files.length + ' 个文件暂存到“继续编辑”池（来源：' + source + '）');
+      }
+
       // ===== 同步 textarea 滚动到高亮层 =====
       function syncScroll() {
         editorHighlight.scrollTop = editorTextarea.scrollTop;
@@ -802,11 +923,9 @@
       editorTextarea.addEventListener('scroll', syncScroll);
 
       // ===== 渲染高亮层 =====
-      // 用 textarea 当前内容 + 当前搜索关键词渲染高亮 HTML
       function renderHighlight() {
         const content = editorTextarea.value;
         const searchText = editorFindInput.value;
-        // 转义 HTML
         const escapeHtml = (s) => s.replace(/[&<>"']/g, c => ({
           '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
         }[c]));
@@ -817,7 +936,6 @@
           return;
         }
 
-        // 按匹配位置切割
         let html = '';
         let lastEnd = 0;
         for (let i = 0; i < currentSearchMatches.length; i++) {
@@ -833,13 +951,12 @@
         if (lastEnd < content.length) {
           html += escapeHtml(content.slice(lastEnd));
         }
-        // 末尾加换行，保证行高与 textarea 一致
         editorHighlight.innerHTML = html + '\n';
         syncScroll();
       }
 
       /* =========================================================
-       *  打标核心：伪装组（查标只读最后一段）
+       *  打标核心
        * ========================================================= */
       const B36 = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
@@ -1357,7 +1474,6 @@
           editorStatus.className = 'editor-status done';
           currentSearchMatches = [];
           currentSearchIndex = -1;
-          // 刷新高亮层（无匹配时显示纯文本）
           editorFindInput.value = '';
           renderHighlight();
           log('📖 已加载编辑文件: ' + filePath + ' (来自 ' + editorCurrentZipName + ')');
@@ -1367,7 +1483,6 @@
         }
       }
 
-      // 构建匹配列表（不区分大小写）
       function buildSearchMatches() {
         const searchText = editorFindInput.value;
         if (!searchText) {
@@ -1400,7 +1515,6 @@
         return true;
       }
 
-      // ===== 核心：跳转匹配时绝对不弹出键盘，同时滚动并刷新高亮 =====
       function jumpToMatch(index) {
         if (index < 0 || index >= currentSearchMatches.length) return;
         currentSearchIndex = index;
@@ -1408,21 +1522,13 @@
         const start = currentSearchMatches[index];
         const lineHeight = 24;
         const lines = content.slice(0, start).split('\n').length;
-
-        // 先失焦（确保键盘收起）
         editorTextarea.blur();
-
-        // 滚动到目标位置（textarea 不聚焦也能滚动）
         editorTextarea.scrollTop = Math.max(0, (lines - 3) * lineHeight);
-
-        // 刷新高亮层（当前匹配会显示不同颜色）
         renderHighlight();
-
         editorStatus.textContent = '🔍 第 ' + (index + 1) + '/' + currentSearchMatches.length + ' 处';
         editorStatus.className = 'editor-status done';
       }
 
-      // ===== 输入查找内容时自动高亮 =====
       let searchInputTimer = null;
       editorFindInput.addEventListener('input', function() {
         if (searchInputTimer) clearTimeout(searchInputTimer);
@@ -1430,7 +1536,6 @@
           currentSearchIndex = -1;
           if (buildSearchMatches()) {
             currentSearchIndex = 0;
-            // 只更新高亮和状态，不滚动不聚焦（避免弹键盘）
             renderHighlight();
             editorStatus.textContent = '🔍 共找到 ' + currentSearchMatches.length + ' 处';
             editorStatus.className = 'editor-status done';
@@ -1440,7 +1545,6 @@
         }, 200);
       });
 
-      // 上一个
       editorFindPrevBtn.addEventListener('click', function() {
         if (currentSearchMatches.length === 0) {
           if (!buildSearchMatches()) { renderHighlight(); return; }
@@ -1450,7 +1554,6 @@
         jumpToMatch(newIndex);
       });
 
-      // 下一个
       editorFindNextBtn.addEventListener('click', function() {
         if (currentSearchMatches.length === 0) {
           if (!buildSearchMatches()) { renderHighlight(); return; }
@@ -1460,7 +1563,6 @@
         jumpToMatch(newIndex);
       });
 
-      // 替换当前匹配
       editorReplaceBtn.addEventListener('click', function() {
         const searchText = editorFindInput.value;
         const replaceText = editorReplaceInput.value;
@@ -1489,7 +1591,6 @@
         if (currentSearchMatches.length > 0) jumpToMatch(currentSearchIndex);
       });
 
-      // 全部替换（不区分大小写）
       editorReplaceAllBtn.addEventListener('click', function() {
         const searchText = editorFindInput.value;
         const replaceText = editorReplaceInput.value;
@@ -1515,7 +1616,6 @@
         if (editorCurrentFilePath) {
           editorModified = true;
         }
-        // 文本变化时重建匹配并刷新高亮（实时）
         const hasSearch = editorFindInput.value.length > 0;
         if (hasSearch) {
           buildSearchMatches();
@@ -1527,7 +1627,6 @@
         syncScroll();
       });
 
-      // 保存并下载
       editorSaveBtn.addEventListener('click', async function() {
         if (!editorCurrentZip) { alert('请先加载文件'); return; }
         try {
@@ -1546,19 +1645,23 @@
             compressionOptions: { level: 6 }
           });
           const outName = editorCurrentZipName;
+          // ===== 新增：自动放入共享池 =====
+          const outFile = new File([outBlob], outName, { type: 'application/zip' });
+          setSharedFiles([outFile], '文本编辑器');
+          // 同时下载
           saveAs(outBlob, outName);
           editorPendingChanges = {};
           editorModified = false;
-          editorStatus.textContent = '✅ 已保存并下载: ' + outName;
+          editorStatus.textContent = '✅ 已保存并下载: ' + outName + '（已暂存到“继续编辑”池）';
           editorStatus.className = 'editor-status done';
-          log('💾 文本编辑保存成功，所有修改已写入到 ' + outName);
+          log('💾 文本编辑保存成功，已暂存到共享池，可继续其他操作');
         } catch (err) {
           alert('保存失败: ' + err.message);
           log('❌ 文本编辑保存失败: ' + err.message);
         }
       });
 
-      // ===== 原有逻辑（保持不变） =====
+      // ===== 原有逻辑 =====
       btnMark.addEventListener('click', async () => {
         const markValue = markText.value.trim();
         if (!markValue) { alert('请输入标记内容！'); return; }
@@ -1582,10 +1685,12 @@
           compressedFiles = [];
           isCompressed = false;
           updateFileStatus(selectedFiles);
+          // ===== 新增：自动放入共享池 =====
+          setSharedFiles(selectedFiles, '打标');
           markStatus.textContent = '✅ ' + files.length + ' 个文件标记已植入: ' + markValue;
           markStatus.className = 'mark-status done';
           btnDownloadMarked.disabled = false;
-          log('✅ 隐形标记植入成功: ' + markValue);
+          log('✅ 隐形标记植入成功，已暂存到“继续编辑”池');
         } catch (error) {
           alert('打标失败：' + error.message);
           log('❌ 打标失败: ' + error.message);
@@ -1733,6 +1838,9 @@
         if (files.length === 0) { log('⚠️ 没有可处理的文件'); return; }
         const markItems = doMark && markContent ? parseMarkInput(markContent) : null;
 
+        // 用于收集最终输出，方便放入共享池
+        const outputs = [];
+
         if (files.length === 1) {
           const file = files[0];
           try {
@@ -1755,8 +1863,10 @@
                 const tempFile = new File([outBlob], file.name);
                 outBlob = await ensureMarkExists(tempFile);
               }
+              outputs.push(new File([outBlob], file.name));
               saveAs(outBlob, file.name);
               log('✅ 处理完成: ' + file.name);
+              setSharedFiles(outputs, '替换demo+其他');
               return;
             }
             if (doConvert && (currentMode === 'bds2bdi' || currentMode === 'bdi2bds')) {
@@ -1771,13 +1881,17 @@
                 const tempFile = new File([outBlob], outFileName);
                 outBlob = await ensureMarkExists(tempFile);
               }
+              outputs.push(new File([outBlob], outFileName));
               saveAs(outBlob, outFileName);
               log('✅ 转换完成: ' + outFileName);
+              setSharedFiles(outputs, '格式转换');
               return;
             }
             if (markItems && markItems.length > 0 && !doReplaceDemo && !doConvert) {
+              outputs.push(processedFile);
               saveAs(processedFile, file.name);
               log('✅ 打标完成: ' + file.name);
+              setSharedFiles(outputs, '打标');
               return;
             }
             if (doReplaceDemo && customDemoBlob && !markItems && !doConvert) {
@@ -1789,8 +1903,10 @@
                 const tempFile = new File([outBlob], file.name);
                 outBlob = await ensureMarkExists(tempFile);
               }
+              outputs.push(new File([outBlob], file.name));
               saveAs(outBlob, file.name);
               log('✅ 替换demo完成: ' + file.name);
+              setSharedFiles(outputs, '替换demo');
               return;
             }
             log('⚠️ 未选择任何有效操作');
@@ -1852,6 +1968,9 @@
           if (doCompress) suffix.push('压缩');
           const zipName = '批量_' + suffix.join('+') + '_' + successCount + '个文件.zip';
           saveAs(outBlob, zipName);
+          // 放入共享池，方便继续编辑
+          const outFile = new File([outBlob], zipName, { type: 'application/zip' });
+          setSharedFiles([outFile], '批量处理');
           log('✅ 批量处理完成，成功 ' + successCount + '，失败 ' + failCount);
           if (savedMarkContent) {
             markStatus.textContent = '✅ 标记已保留: ' + savedMarkContent;
@@ -2197,6 +2316,10 @@
         downloadCompressedBtn.disabled = false;
         updateFileStatus(selectedFiles);
         log('✅ 压缩完成');
+        // ===== 新增：压缩完成后自动放入共享池 =====
+        const outFiles = compressedFiles.map(f => new File([f.blob], f.name));
+        setSharedFiles(outFiles, '图片压缩');
+        log('📥 压缩结果已暂存到“继续编辑”池');
       }
 
       downloadCompressedBtn.addEventListener('click', function() {
@@ -2458,7 +2581,10 @@
               }
             }
             saveAs(outBlob, outFileName);
-            log('✅ 转换成功: ' + outFileName);
+            // ===== 新增：自动放入共享池 =====
+            const outFile = new File([outBlob], outFileName, { type: 'application/zip' });
+            setSharedFiles([outFile], '格式转换');
+            log('✅ 转换成功，已暂存到“继续编辑”池: ' + outFileName);
           } catch (err) {
             log('❌ 转换失败: ' + err.message);
             alert('转换失败: ' + err.message);
@@ -2498,7 +2624,10 @@
         try {
           const resultBlob = await resultZip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
           saveAs(resultBlob, '批量转换_' + outExt + '.zip');
-          log('✅ 批量转换完成，成功 ' + successCount + '，失败 ' + failCount);
+          // ===== 新增：批量转换结果也放入共享池 =====
+          const outFile = new File([resultBlob], '批量转换_' + outExt + '.zip', { type: 'application/zip' });
+          setSharedFiles([outFile], '批量转换');
+          log('✅ 批量转换完成，成功 ' + successCount + '，失败 ' + failCount + '，已暂存到共享池');
         } catch (err) {
           log('❌ 打包下载失败: ' + err.message);
           alert('打包下载失败: ' + err.message);
@@ -2530,7 +2659,9 @@
               }
             }
             saveAs(outBlob, file.name);
-            log('✅ 替换demo成功: ' + file.name);
+            const outFile = new File([outBlob], file.name, { type: 'application/zip' });
+            setSharedFiles([outFile], '替换demo');
+            log('✅ 替换demo成功，已暂存到“继续编辑”池: ' + file.name);
           } catch (err) {
             log('❌ ' + file.name + ' 失败: ' + err.message);
             alert('替换失败: ' + err.message);
@@ -2560,7 +2691,9 @@
         }
         const outBlob = await resultZip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
         saveAs(outBlob, '仅替换demo_' + filesToProcess.length + '个文件.zip');
-        log('✅ 完成');
+        const outFile = new File([outBlob], '仅替换demo_' + filesToProcess.length + '个文件.zip', { type: 'application/zip' });
+        setSharedFiles([outFile], '批量替换demo');
+        log('✅ 完成，已暂存到共享池');
       });
 
       extractAudioBtn.addEventListener('click', async function() {
@@ -2741,7 +2874,9 @@
               }
             }
             saveAs(outBlob, file.name);
-            log('✅ 音效替换成功: ' + file.name);
+            const outFile = new File([outBlob], file.name, { type: 'application/zip' });
+            setSharedFiles([outFile], '音效替换');
+            log('✅ 音效替换成功，已暂存到“继续编辑”池: ' + file.name);
           } catch (err) {
             log('❌ 替换失败: ' + err.message);
             alert('替换失败: ' + err.message);
@@ -2774,7 +2909,9 @@
         }
         const outBlob = await resultZip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
         saveAs(outBlob, '音效替换_' + filesToProcess.length + '个文件.zip');
-        log('✅ 批量替换完成');
+        const outFile = new File([outBlob], '音效替换_' + filesToProcess.length + '个文件.zip', { type: 'application/zip' });
+        setSharedFiles([outFile], '批量音效替换');
+        log('✅ 批量替换完成，已暂存到共享池');
         replaceAudioBtn.disabled = false;
         replaceAudioBtn.textContent = '🔊 替换音效并下载';
       });
@@ -3413,6 +3550,13 @@
         const hasPending = encryptFileItems.some(item => item.status === 'pending');
         encryptActionBtn.disabled = !hasPending;
         encryptDownloadAllBtn.disabled = !encryptFileItems.some(item => item.status === 'done');
+        // ===== 新增：加密/解密完成后，把结果放入共享池 =====
+        const doneItems = encryptFileItems.filter(item => item.status === 'done' && item.processedBlob);
+        if (doneItems.length > 0) {
+          const outFiles = doneItems.map(item => new File([item.processedBlob], item.processedName || item.file.name));
+          setSharedFiles(outFiles, isEncrypt ? '加密' : '解密');
+          encryptLog('📥 处理结果已暂存到“继续编辑”池，可在其他工具中继续操作');
+        }
       }
 
       async function downloadEncryptAll() {
@@ -3505,7 +3649,7 @@
       encryptClearLog();
       renderEncryptFileList();
 
-      // ===================== 融彩转换（新版，默认模式一） =====================
+      // ===================== 融彩转换 =====================
       (function() {
         const rongcaiDropBox = document.getElementById('rongcaiDropBox');
         const rongcaiFileInput = document.getElementById('rongcaiFileInput');
@@ -3551,7 +3695,6 @@
           }
         };
 
-        // 默认模式一（彩底转融合底）
         btnMode1.classList.add('active-mode');
         btnMode2.classList.remove('active-mode');
 
@@ -3597,6 +3740,9 @@
             rongcaiSetStatus(`已加载 ${rongcaiSourceZips.length} 个，可处理`, true);
           }
         }
+
+        // 暴露给全局，以便“从共享池导入”
+        window.__rongcaiLoadFiles = rongcaiLoadFiles;
 
         async function rongcaiProcessImagePng(pngBlob, fillColorHex) {
           return new Promise((resolve, reject) => {
@@ -3721,6 +3867,10 @@
             rongcaiDlBtn.disabled = false;
             rongcaiLogMsg('📦 全部打包完成，可下载');
             rongcaiSetStatus(`处理完成：成功 ${rongcaiOutputZips.length} 个 ✅`, true);
+            // ===== 新增：融彩结果自动放入共享池 =====
+            const outFiles = rongcaiOutputZips.map((blob, i) => new File([blob], rongcaiOutputNames[i]));
+            setSharedFiles(outFiles, '融彩转换');
+            rongcaiLogMsg('📥 处理结果已暂存到“继续编辑”池，可继续其他操作');
           } else {
             rongcaiLogMsg('❌ 没有成功处理任何文件');
             rongcaiSetStatus('处理出错');
