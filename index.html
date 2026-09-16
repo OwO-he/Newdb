@@ -307,12 +307,115 @@
     .mark-copy-btn:hover { background: #dcfce7; }
     .mark-copy-btn.copied { background: #15803d; color: #fff; border-color: #15803d; }
     .file-stat { font-size: 0.85rem; padding: 2px 0; color: var(--text-secondary); }
+
+    /* ===== 文本编辑器 ===== */
+    .text-editor-panel { margin-top: 20px; border-top: 2px solid var(--border-subtle); padding-top: 16px; }
+    .text-editor-title { font-size: 16px; font-weight: 600; color: var(--text-primary);
+      margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+    .text-editor-file-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+      margin-bottom: 10px; }
+    .text-editor-file-bar select { flex: 1; min-width: 200px; padding: 8px 14px; border-radius: 12px;
+      border: 1px solid var(--border-subtle); font-size: 14px; background: var(--bg-card);
+      color: var(--text-primary); outline: none; }
+    .text-editor-file-bar select:focus { border-color: var(--color-accent); }
+    .text-editor-btn { padding: 6px 16px; border: none; border-radius: 20px; font-size: 13px;
+      font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap;
+      background: var(--color-accent); color: white; }
+    .text-editor-btn:hover:not(:disabled) { background: var(--color-accent-dark); transform: scale(0.97); }
+    .text-editor-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .text-editor-btn.save-btn { background: #2a5a3e; }
+    .text-editor-btn.save-btn:hover:not(:disabled) { background: #1f4a2e; }
+
+    /* ===== 编辑器主体（高亮层 + 透明 textarea） ===== */
+    .editor-container { border: 1px solid var(--border-subtle); border-radius: 14px;
+      background: var(--bg-card); overflow: hidden; }
+    .editor-wrap { position: relative; width: 100%; }
+    /* 高亮层：显示彩色文字和背景 */
+    .editor-highlight {
+      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      padding: 14px 16px; font-family: 'SF Mono', 'Menlo', 'Consolas', monospace;
+      font-size: 14px; line-height: 1.7; white-space: pre-wrap; word-break: break-all;
+      overflow: hidden; pointer-events: none; tab-size: 4;
+      color: var(--text-primary);
+    }
+    /* 匹配高亮 mark —— 只保留平面底色，去掉边框/阴影/圆角 */
+    .editor-highlight mark {
+      background: #ffe066; color: #000;
+      padding: 0; border: none; border-radius: 0; box-shadow: none;
+    }
+    .editor-highlight mark.current {
+      background: #ff8c00; color: #fff;
+      padding: 0; border: none; border-radius: 0; box-shadow: none;
+    }
+    /* textarea 透明叠加，负责编辑和输入 */
+    .editor-textarea {
+      position: relative; z-index: 2;
+      width: 100%; min-height: 300px; padding: 14px 16px;
+      border: none; outline: none; resize: vertical;
+      font-family: 'SF Mono', 'Menlo', 'Consolas', monospace;
+      font-size: 14px; line-height: 1.7; tab-size: 4;
+      background: transparent; color: transparent;
+      caret-color: var(--color-accent);
+      white-space: pre-wrap; word-break: break-all;
+      overflow-x: hidden;
+    }
+    .editor-textarea::selection { background: rgba(59,124,255,0.3); color: transparent; }
+    .editor-textarea:focus { background: transparent; }
+
+    /* 底部查找替换栏 */
+    .editor-find-bar { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center;
+      padding: 10px 14px; background: var(--bg-tabs); border-top: 1px solid var(--border-subtle);
+      border-radius: 0 0 14px 14px; }
+    .editor-find-bar label { font-weight: 500; color: var(--text-secondary); font-size: 14px; white-space: nowrap; }
+    .editor-find-bar input[type="text"] { flex: 1; min-width: 100px; padding: 6px 12px;
+      border-radius: 40px; border: 1px solid var(--border-subtle); font-size: 14px;
+      outline: none; background: var(--bg-card); color: var(--text-primary); }
+    .editor-find-bar input[type="text"]:focus { border-color: var(--color-accent); }
+    .editor-find-bar .find-btn { padding: 6px 16px; border: none; border-radius: 20px;
+      font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+      background: var(--color-accent); color: white; white-space: nowrap; }
+    .editor-find-bar .find-btn:hover:not(:disabled) { background: var(--color-accent-dark); transform: scale(0.97); }
+    .editor-find-bar .find-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .editor-find-bar .find-btn.replace-btn { background: #ff8c00; }
+    .editor-find-bar .find-btn.replace-btn:hover:not(:disabled) { background: #e07a00; }
+    .editor-find-bar .find-btn.replace-all-btn { background: #8a5a7a; }
+    .editor-find-bar .find-btn.replace-all-btn:hover:not(:disabled) { background: #6a4a5a; }
+    .editor-find-bar .find-btn.nav-btn { background: var(--bg-subtle); color: var(--text-secondary);
+      border: 1px solid var(--border-subtle); font-weight: 500; }
+    .editor-find-bar .find-btn.nav-btn:hover:not(:disabled) { background: var(--bg-upload-hover); }
+    .editor-status { font-size: 12px; color: var(--text-light); padding: 2px 10px;
+      border-radius: 12px; background: var(--bg-subtle); white-space: nowrap; }
+    .editor-status.done { color: var(--color-success); background: var(--color-success-bg); }
+    .editor-status.error { color: #c0392b; background: var(--color-error-bg); }
+
+    /* ===== 文件选择弹窗 ===== */
+    .editor-file-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.4); z-index: 999; justify-content: center; align-items: center; }
+    .editor-file-modal.show { display: flex; }
+    .editor-file-modal-content { background: var(--bg-card); border-radius: 20px; padding: 20px;
+      max-width: 480px; width: 90%; max-height: 70vh; overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+    .editor-file-modal-content h3 { font-size: 16px; margin-bottom: 12px; color: var(--text-primary); }
+    .editor-file-modal-content .modal-file-item { display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: 12px; cursor: pointer; transition: background 0.15s;
+      border: 1px solid transparent; margin-bottom: 4px; }
+    .editor-file-modal-content .modal-file-item:hover { background: var(--bg-subtle); border-color: var(--border-subtle); }
+    .editor-file-modal-content .modal-file-item .modal-file-name { font-weight: 500;
+      color: var(--text-primary); font-size: 14px; word-break: break-all; flex: 1; }
+    .editor-file-modal-content .modal-file-item .modal-file-tag { font-size: 11px;
+      padding: 2px 8px; border-radius: 20px; background: var(--bg-tabs); color: var(--text-muted); }
+    .editor-file-modal-content .modal-file-item .modal-file-tag.light { background: #fff3e0; color: #e65100; }
+    .editor-file-modal-content .modal-file-item .modal-file-tag.dark { background: #1a237e; color: #9fa8da; }
+    .editor-file-modal-content .modal-close { margin-top: 12px; width: 100%; padding: 10px;
+      border: none; border-radius: 12px; background: var(--bg-tabs); color: var(--text-secondary);
+      font-weight: 600; cursor: pointer; font-size: 14px; }
+    .editor-file-modal-content .modal-close:hover { background: var(--bg-upload-hover); }
   </style>
 </head>
 <body>
   <div class="card">
     <h1>⌨️ 百度输入法 · 综合工具</h1>
-    <div class="sub">图片压缩 · 皮肤双向转换 · 溯源秘标 · 加密/解密 · 音效处理 · 字体打标 · 融彩转换</div>
+    <div class="sub">图片压缩 · 皮肤双向转换 · 溯源秘标 · 加密/解密 · 音效处理 · 字体打标 · 融彩转换 · 文本编辑</div>
 
     <div class="main-tabs" id="mainTabs">
       <button class="main-tab active" data-section="skin">🎨 皮肤工具</button>
@@ -424,6 +527,44 @@
         </div>
       </div>
 
+      <!-- ===== 文本编辑器 ===== -->
+      <div class="text-editor-panel" id="textEditorPanel">
+        <div class="text-editor-title">📝 文本编辑器 (Info.txt / default.css)</div>
+        <div class="text-editor-file-bar">
+          <select id="editorFileSelect">
+            <option value="">-- 请先上传皮肤包 --</option>
+          </select>
+          <button class="text-editor-btn" id="editorLoadBtn" disabled>📖 加载文件</button>
+          <button class="text-editor-btn save-btn" id="editorSaveBtn" disabled>💾 保存并下载</button>
+          <span class="editor-status" id="editorStatus">⏳ 等待加载</span>
+        </div>
+        <div class="editor-container">
+          <div class="editor-wrap">
+            <div class="editor-highlight" id="editorHighlight"></div>
+            <textarea class="editor-textarea" id="editorTextarea" placeholder="加载文件后在此编辑..." spellcheck="false"></textarea>
+          </div>
+          <div class="editor-find-bar">
+            <label>查找</label>
+            <input type="text" id="editorFindInput" placeholder="输入查找内容（不区分大小写，自动高亮）..." autocomplete="off">
+            <button class="find-btn nav-btn" id="editorFindPrevBtn" disabled>↑ 上一个</button>
+            <button class="find-btn nav-btn" id="editorFindNextBtn" disabled>↓ 下一个</button>
+            <label>替换</label>
+            <input type="text" id="editorReplaceInput" placeholder="输入替换内容..." autocomplete="off">
+            <button class="find-btn replace-btn" id="editorReplaceBtn" disabled>替换</button>
+            <button class="find-btn replace-all-btn" id="editorReplaceAllBtn" disabled>全部替换</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 文件选择弹窗 -->
+      <div class="editor-file-modal" id="editorFileModal">
+        <div class="editor-file-modal-content">
+          <h3>📂 选择要编辑的文件</h3>
+          <div id="editorFileModalList"></div>
+          <button class="modal-close" id="editorFileModalClose">取消</button>
+        </div>
+      </div>
+
       <div class="extract-result" id="extractResult" style="display:none;">
         <strong>📋 秘标查验结果</strong>
         <pre id="extractContent" style="margin-top:6px;font-size:13px;white-space:pre-wrap;word-break:break-all;"></pre>
@@ -521,7 +662,7 @@
     </div>
 
     <div class="log-box" id="logBox"></div>
-    <div class="footnote">图片压缩(可选) · 皮肤双向转换 · 溯源秘标 · 加密/解密 · 音效提取/转换/替换 · 字体打标 · 融彩转换</div>
+    <div class="footnote">图片压缩(可选) · 皮肤双向转换 · 溯源秘标 · 加密/解密 · 音效提取/转换/替换 · 字体打标 · 融彩转换 · 文本编辑</div>
   </div>
 
   <script>
@@ -606,6 +747,24 @@
       const checkResult = document.getElementById('checkResult');
       const resultContent = document.getElementById('resultContent');
 
+      // ===== 文本编辑器 DOM =====
+      const editorFileSelect = document.getElementById('editorFileSelect');
+      const editorLoadBtn = document.getElementById('editorLoadBtn');
+      const editorSaveBtn = document.getElementById('editorSaveBtn');
+      const editorTextarea = document.getElementById('editorTextarea');
+      const editorHighlight = document.getElementById('editorHighlight');
+      const editorFindInput = document.getElementById('editorFindInput');
+      const editorFindPrevBtn = document.getElementById('editorFindPrevBtn');
+      const editorFindNextBtn = document.getElementById('editorFindNextBtn');
+      const editorReplaceInput = document.getElementById('editorReplaceInput');
+      const editorReplaceBtn = document.getElementById('editorReplaceBtn');
+      const editorReplaceAllBtn = document.getElementById('editorReplaceAllBtn');
+      const editorStatus = document.getElementById('editorStatus');
+      // 弹窗
+      const editorFileModal = document.getElementById('editorFileModal');
+      const editorFileModalList = document.getElementById('editorFileModalList');
+      const editorFileModalClose = document.getElementById('editorFileModalClose');
+
       let selectedFiles = [];
       let compressedFiles = [];
       let customDemoFile = null;
@@ -620,6 +779,64 @@
 
       let savedMarkContent = '';
       let isMarked = false;
+
+      // ===== 文本编辑器状态 =====
+      let editorCurrentZip = null;
+      let editorCurrentZipName = '';
+      let editorCurrentFilePath = '';
+      let editorModified = false;
+
+      // ===== 自动保存相关 =====
+      let editorPendingChanges = {};
+      let editorHasLoadedFile = false;
+
+      // ===== 查找状态 =====
+      let currentSearchMatches = [];
+      let currentSearchIndex = -1;
+
+      // ===== 同步 textarea 滚动到高亮层 =====
+      function syncScroll() {
+        editorHighlight.scrollTop = editorTextarea.scrollTop;
+        editorHighlight.scrollLeft = editorTextarea.scrollLeft;
+      }
+      editorTextarea.addEventListener('scroll', syncScroll);
+
+      // ===== 渲染高亮层 =====
+      // 用 textarea 当前内容 + 当前搜索关键词渲染高亮 HTML
+      function renderHighlight() {
+        const content = editorTextarea.value;
+        const searchText = editorFindInput.value;
+        // 转义 HTML
+        const escapeHtml = (s) => s.replace(/[&<>"']/g, c => ({
+          '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+        }[c]));
+
+        if (!searchText || currentSearchMatches.length === 0) {
+          editorHighlight.innerHTML = escapeHtml(content) + '\n';
+          syncScroll();
+          return;
+        }
+
+        // 按匹配位置切割
+        let html = '';
+        let lastEnd = 0;
+        for (let i = 0; i < currentSearchMatches.length; i++) {
+          const start = currentSearchMatches[i];
+          const end = start + searchText.length;
+          if (start > lastEnd) {
+            html += escapeHtml(content.slice(lastEnd, start));
+          }
+          const cls = (i === currentSearchIndex) ? 'current' : '';
+          html += '<mark class="' + cls + '">' + escapeHtml(content.slice(start, end)) + '</mark>';
+          lastEnd = end;
+        }
+        if (lastEnd < content.length) {
+          html += escapeHtml(content.slice(lastEnd));
+        }
+        // 末尾加换行，保证行高与 textarea 一致
+        editorHighlight.innerHTML = html + '\n';
+        syncScroll();
+      }
 
       /* =========================================================
        *  打标核心：伪装组（查标只读最后一段）
@@ -984,6 +1201,25 @@
           btnMark.disabled = false;
           markStatus.textContent = '📁 ' + files.length + ' 个文件';
           markStatus.className = 'mark-status';
+          // 更新编辑器下拉框
+          editorFileSelect.innerHTML = '<option value="">-- 请选择文件 --</option>' +
+            files.map((f, i) => `<option value="${i}">${escapeHtml(f.name)}</option>`).join('');
+          editorLoadBtn.disabled = true;
+          editorSaveBtn.disabled = true;
+          editorFindPrevBtn.disabled = true;
+          editorFindNextBtn.disabled = true;
+          editorReplaceBtn.disabled = true;
+          editorReplaceAllBtn.disabled = true;
+          editorStatus.textContent = '⏳ 等待加载';
+          editorStatus.className = 'editor-status';
+          editorTextarea.value = '';
+          editorHighlight.innerHTML = '';
+          editorCurrentZip = null;
+          editorCurrentFilePath = '';
+          editorPendingChanges = {};
+          editorHasLoadedFile = false;
+          currentSearchMatches = [];
+          currentSearchIndex = -1;
         } else {
           fileStatus.style.display = 'none';
           compressBtn.disabled = true;
@@ -997,9 +1233,332 @@
           btnMark.disabled = true;
           markStatus.textContent = '⏳ 等待文件';
           markStatus.className = 'mark-status';
+          // 清空编辑器
+          editorFileSelect.innerHTML = '<option value="">-- 请先上传皮肤包 --</option>';
+          editorLoadBtn.disabled = true;
+          editorSaveBtn.disabled = true;
+          editorFindPrevBtn.disabled = true;
+          editorFindNextBtn.disabled = true;
+          editorReplaceBtn.disabled = true;
+          editorReplaceAllBtn.disabled = true;
+          editorStatus.textContent = '⏳ 等待加载';
+          editorStatus.className = 'editor-status';
+          editorTextarea.value = '';
+          editorHighlight.innerHTML = '';
+          editorCurrentZip = null;
+          editorCurrentFilePath = '';
+          editorPendingChanges = {};
+          editorHasLoadedFile = false;
+          currentSearchMatches = [];
+          currentSearchIndex = -1;
         }
       }
 
+      // ===== 文本编辑器逻辑 =====
+      editorFileSelect.addEventListener('change', function() {
+        const idx = this.value;
+        if (idx === '') { editorLoadBtn.disabled = true; return; }
+        editorLoadBtn.disabled = false;
+      });
+
+      function showEditorFileModal(options) {
+        editorFileModalList.innerHTML = '';
+        options.forEach((opt, i) => {
+          const div = document.createElement('div');
+          div.className = 'modal-file-item';
+          let tagHtml = '';
+          const lowerPath = opt.toLowerCase();
+          if (lowerPath.includes('/light/') || lowerPath.includes('light/')) {
+            tagHtml = '<span class="modal-file-tag light">日间</span>';
+          } else if (lowerPath.includes('/dark/') || lowerPath.includes('dark/')) {
+            tagHtml = '<span class="modal-file-tag dark">夜间</span>';
+          } else {
+            tagHtml = '<span class="modal-file-tag">通用</span>';
+          }
+          div.innerHTML = `<span class="modal-file-name">${escapeHtml(opt)}</span>${tagHtml}`;
+          div.addEventListener('click', () => {
+            editorFileModal.classList.remove('show');
+            loadEditorFile(opt);
+          });
+          editorFileModalList.appendChild(div);
+        });
+        editorFileModal.classList.add('show');
+      }
+
+      editorFileModalClose.addEventListener('click', () => {
+        editorFileModal.classList.remove('show');
+      });
+      editorFileModal.addEventListener('click', (e) => {
+        if (e.target === editorFileModal) editorFileModal.classList.remove('show');
+      });
+
+      editorLoadBtn.addEventListener('click', async function() {
+        const idx = editorFileSelect.value;
+        if (idx === '') { alert('请先选择文件'); return; }
+        const files = getFilesToProcess();
+        if (!files || files.length === 0) { alert('请先上传皮肤包'); return; }
+        const file = files[parseInt(idx)];
+        try {
+          const ab = await file.arrayBuffer();
+          const zip = await JSZip.loadAsync(ab);
+          editorCurrentZip = zip;
+          editorCurrentZipName = file.name;
+          const allFiles = Object.keys(zip.files).filter(n => !zip.files[n].dir);
+          const options = [];
+          for (const name of allFiles) {
+            const lower = name.toLowerCase();
+            if (lower.endsWith('info.txt') || lower.endsWith('default.css')) {
+              options.push(name);
+            }
+          }
+          if (options.length === 0) {
+            alert('该皮肤包中未找到 Info.txt 或 default.css 文件');
+            editorCurrentZip = null;
+            return;
+          }
+          if (options.length === 1) {
+            await loadEditorFile(options[0]);
+          } else {
+            showEditorFileModal(options);
+          }
+        } catch (err) {
+          alert('加载失败: ' + err.message);
+          log('❌ 编辑器加载失败: ' + err.message);
+        }
+      });
+
+      async function loadEditorFile(filePath) {
+        if (!editorCurrentZip) return;
+        if (editorHasLoadedFile && editorCurrentFilePath && editorModified) {
+          editorPendingChanges[editorCurrentFilePath] = editorTextarea.value;
+          log('💾 自动暂存修改: ' + editorCurrentFilePath);
+        }
+        try {
+          let content;
+          if (editorPendingChanges[filePath] !== undefined) {
+            content = editorPendingChanges[filePath];
+            log('📖 从暂存区加载: ' + filePath);
+          } else {
+            const entry = editorCurrentZip.file(filePath);
+            if (!entry) { alert('文件不存在: ' + filePath); return; }
+            content = await entry.async('string');
+            log('📖 从皮肤包加载: ' + filePath);
+          }
+          editorTextarea.value = content;
+          editorCurrentFilePath = filePath;
+          editorModified = false;
+          editorHasLoadedFile = true;
+          editorFindPrevBtn.disabled = false;
+          editorFindNextBtn.disabled = false;
+          editorReplaceBtn.disabled = false;
+          editorReplaceAllBtn.disabled = false;
+          editorSaveBtn.disabled = false;
+          editorStatus.textContent = '📄 已加载: ' + filePath + ' (修改自动暂存)';
+          editorStatus.className = 'editor-status done';
+          currentSearchMatches = [];
+          currentSearchIndex = -1;
+          // 刷新高亮层（无匹配时显示纯文本）
+          editorFindInput.value = '';
+          renderHighlight();
+          log('📖 已加载编辑文件: ' + filePath + ' (来自 ' + editorCurrentZipName + ')');
+        } catch (err) {
+          alert('读取文件失败: ' + err.message);
+          log('❌ 读取编辑文件失败: ' + err.message);
+        }
+      }
+
+      // 构建匹配列表（不区分大小写）
+      function buildSearchMatches() {
+        const searchText = editorFindInput.value;
+        if (!searchText) {
+          currentSearchMatches = [];
+          currentSearchIndex = -1;
+          editorStatus.textContent = '⚠️ 请输入查找内容';
+          editorStatus.className = 'editor-status error';
+          return false;
+        }
+        const content = editorTextarea.value;
+        const lowerContent = content.toLowerCase();
+        const lowerSearch = searchText.toLowerCase();
+        currentSearchMatches = [];
+        let pos = 0;
+        while (true) {
+          const idx = lowerContent.indexOf(lowerSearch, pos);
+          if (idx === -1) break;
+          currentSearchMatches.push(idx);
+          pos = idx + 1;
+        }
+        if (currentSearchMatches.length === 0) {
+          editorStatus.textContent = '🔍 未找到 "' + searchText + '"';
+          editorStatus.className = 'editor-status error';
+          currentSearchIndex = -1;
+          return false;
+        }
+        if (currentSearchIndex < 0 || currentSearchIndex >= currentSearchMatches.length) {
+          currentSearchIndex = 0;
+        }
+        return true;
+      }
+
+      // ===== 核心：跳转匹配时绝对不弹出键盘，同时滚动并刷新高亮 =====
+      function jumpToMatch(index) {
+        if (index < 0 || index >= currentSearchMatches.length) return;
+        currentSearchIndex = index;
+        const content = editorTextarea.value;
+        const start = currentSearchMatches[index];
+        const lineHeight = 24;
+        const lines = content.slice(0, start).split('\n').length;
+
+        // 先失焦（确保键盘收起）
+        editorTextarea.blur();
+
+        // 滚动到目标位置（textarea 不聚焦也能滚动）
+        editorTextarea.scrollTop = Math.max(0, (lines - 3) * lineHeight);
+
+        // 刷新高亮层（当前匹配会显示不同颜色）
+        renderHighlight();
+
+        editorStatus.textContent = '🔍 第 ' + (index + 1) + '/' + currentSearchMatches.length + ' 处';
+        editorStatus.className = 'editor-status done';
+      }
+
+      // ===== 输入查找内容时自动高亮 =====
+      let searchInputTimer = null;
+      editorFindInput.addEventListener('input', function() {
+        if (searchInputTimer) clearTimeout(searchInputTimer);
+        searchInputTimer = setTimeout(() => {
+          currentSearchIndex = -1;
+          if (buildSearchMatches()) {
+            currentSearchIndex = 0;
+            // 只更新高亮和状态，不滚动不聚焦（避免弹键盘）
+            renderHighlight();
+            editorStatus.textContent = '🔍 共找到 ' + currentSearchMatches.length + ' 处';
+            editorStatus.className = 'editor-status done';
+          } else {
+            renderHighlight();
+          }
+        }, 200);
+      });
+
+      // 上一个
+      editorFindPrevBtn.addEventListener('click', function() {
+        if (currentSearchMatches.length === 0) {
+          if (!buildSearchMatches()) { renderHighlight(); return; }
+        }
+        let newIndex = currentSearchIndex - 1;
+        if (newIndex < 0) newIndex = currentSearchMatches.length - 1;
+        jumpToMatch(newIndex);
+      });
+
+      // 下一个
+      editorFindNextBtn.addEventListener('click', function() {
+        if (currentSearchMatches.length === 0) {
+          if (!buildSearchMatches()) { renderHighlight(); return; }
+        }
+        let newIndex = currentSearchIndex + 1;
+        if (newIndex >= currentSearchMatches.length) newIndex = 0;
+        jumpToMatch(newIndex);
+      });
+
+      // 替换当前匹配
+      editorReplaceBtn.addEventListener('click', function() {
+        const searchText = editorFindInput.value;
+        const replaceText = editorReplaceInput.value;
+        if (!searchText) { alert('请输入查找内容'); return; }
+        if (currentSearchMatches.length === 0 || currentSearchIndex < 0) {
+          if (!buildSearchMatches()) return;
+          jumpToMatch(0);
+          return;
+        }
+        const content = editorTextarea.value;
+        const start = currentSearchMatches[currentSearchIndex];
+        const end = start + searchText.length;
+        const newContent = content.slice(0, start) + replaceText + content.slice(end);
+        editorTextarea.value = newContent;
+        editorModified = true;
+        editorStatus.textContent = '🔄 已替换 1 处';
+        editorStatus.className = 'editor-status done';
+        const oldIndex = currentSearchIndex;
+        buildSearchMatches();
+        if (currentSearchMatches.length === 0) {
+          currentSearchIndex = -1;
+        } else {
+          currentSearchIndex = Math.min(oldIndex, currentSearchMatches.length - 1);
+        }
+        renderHighlight();
+        if (currentSearchMatches.length > 0) jumpToMatch(currentSearchIndex);
+      });
+
+      // 全部替换（不区分大小写）
+      editorReplaceAllBtn.addEventListener('click', function() {
+        const searchText = editorFindInput.value;
+        const replaceText = editorReplaceInput.value;
+        if (!searchText) { alert('请输入查找内容'); return; }
+        const content = editorTextarea.value;
+        const escaped = searchText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(escaped, 'gi');
+        const matches = content.match(regex);
+        const count = matches ? matches.length : 0;
+        if (count === 0) { alert('未找到匹配内容'); return; }
+        const newContent = content.replace(regex, replaceText);
+        editorTextarea.value = newContent;
+        editorModified = true;
+        editorStatus.textContent = '🔄 已替换 ' + count + ' 处';
+        editorStatus.className = 'editor-status done';
+        currentSearchMatches = [];
+        currentSearchIndex = -1;
+        renderHighlight();
+        log('🔄 全部替换 ' + count + ' 处 "' + searchText + '" → "' + replaceText + '" (不区分大小写)');
+      });
+
+      editorTextarea.addEventListener('input', function() {
+        if (editorCurrentFilePath) {
+          editorModified = true;
+        }
+        // 文本变化时重建匹配并刷新高亮（实时）
+        const hasSearch = editorFindInput.value.length > 0;
+        if (hasSearch) {
+          buildSearchMatches();
+        } else {
+          currentSearchMatches = [];
+          currentSearchIndex = -1;
+        }
+        renderHighlight();
+        syncScroll();
+      });
+
+      // 保存并下载
+      editorSaveBtn.addEventListener('click', async function() {
+        if (!editorCurrentZip) { alert('请先加载文件'); return; }
+        try {
+          if (editorCurrentFilePath && editorModified) {
+            editorPendingChanges[editorCurrentFilePath] = editorTextarea.value;
+          }
+          for (const [filePath, content] of Object.entries(editorPendingChanges)) {
+            editorCurrentZip.file(filePath, content);
+            log('💾 写入修改: ' + filePath);
+          }
+          if (editorCurrentFilePath && !editorPendingChanges[editorCurrentFilePath]) {
+            editorCurrentZip.file(editorCurrentFilePath, editorTextarea.value);
+          }
+          const outBlob = await editorCurrentZip.generateAsync({
+            type: 'blob', compression: 'DEFLATE',
+            compressionOptions: { level: 6 }
+          });
+          const outName = editorCurrentZipName;
+          saveAs(outBlob, outName);
+          editorPendingChanges = {};
+          editorModified = false;
+          editorStatus.textContent = '✅ 已保存并下载: ' + outName;
+          editorStatus.className = 'editor-status done';
+          log('💾 文本编辑保存成功，所有修改已写入到 ' + outName);
+        } catch (err) {
+          alert('保存失败: ' + err.message);
+          log('❌ 文本编辑保存失败: ' + err.message);
+        }
+      });
+
+      // ===== 原有逻辑（保持不变） =====
       btnMark.addEventListener('click', async () => {
         const markValue = markText.value.trim();
         if (!markValue) { alert('请输入标记内容！'); return; }
